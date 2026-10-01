@@ -9,7 +9,7 @@
 // it and push notifications (daily greeting + shipment status changes)
 // will work.
 
-const CACHE_NAME = 'jps-logistics-v2';
+const CACHE_NAME = 'jps-logistics-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

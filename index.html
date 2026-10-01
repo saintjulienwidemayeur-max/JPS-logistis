@@ -74,6 +74,7 @@
      supabase-functions/) — a single HTML file can't host them itself.
      Place both at the root of your real domain once deployed; until
      then this link 404s harmlessly and the site works exactly the same. -->
+<meta name="jps-build" content="2026-10-01-brevo-otp">
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1458,12 +1459,33 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     }
   }
 
+  let resendTimer = null;
+  function startResendCooldown(seconds = 60){
+    const btn = document.getElementById('signupOtpResend');
+    clearInterval(resendTimer);
+    let left = seconds;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    const tick = () => {
+      if (left <= 0) {
+        clearInterval(resendTimer);
+        btn.disabled = false; btn.style.opacity = ''; btn.textContent = 'Renvoyer le code';
+        return;
+      }
+      btn.textContent = 'Renvoyer le code (' + left + 's)';
+      left -= 1;
+    };
+    tick();
+    resendTimer = setInterval(tick, 1000);
+  }
+
   async function sendSignupOtp(email){
     const res = await callAuthFn({
       action: 'send_otp', purpose: 'signup', email,
       phone: document.getElementById('signupPhone').value.trim()
     });
     if (res.ok) {
+      startResendCooldown();
       document.getElementById('signupOtpEmail').textContent = email;
       document.getElementById('signupOtpDemo').textContent = '';
       document.getElementById('signupOtpInput').value = '';
@@ -1489,10 +1511,18 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   });
 
   document.getElementById('signupOtpResend').addEventListener('click', async () => {
+    const btn = document.getElementById('signupOtpResend');
+    if (btn.disabled) return;
     const errEl = document.getElementById('signupOtpError');
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours…';
     const res = await sendSignupOtp(document.getElementById('signupEmail').value.trim().toLowerCase());
-    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
-    document.getElementById('signupOtpDemo').textContent = 'Un nouveau code vient d\'être envoyé.';
+    if (!res.ok) {
+      btn.disabled = false; btn.style.opacity = ''; btn.textContent = 'Renvoyer le code';
+      if (res.data && res.data.error === 'RATE_LIMIT') startResendCooldown(30);
+      return showError(errEl, authErrorMessage(res.data && res.data.error));
+    }
+    document.getElementById('signupOtpDemo').textContent = "Un nouveau code vient d'être envoyé à votre e-mail.";
   });
   document.getElementById('signupOtpBack').addEventListener('click', () => {
     document.getElementById('signupStepOtp').classList.add('hidden');
