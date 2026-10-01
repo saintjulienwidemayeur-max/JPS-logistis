@@ -82,7 +82,7 @@ declare
   v_id uuid;
   v_box text;
 begin
-  if exists (select 1 from public.clients where email = lower(p_email)) then
+  if exists (select 1 from public.clients c0 where c0.email = lower(p_email)) then
     raise exception 'EMAIL_TAKEN';
   end if;
 
@@ -222,8 +222,8 @@ returns table(id uuid, name text, email text, role text, created_at timestamptz)
 language plpgsql security definer set search_path = public as $$
 begin
   if not exists (
-    select 1 from public.admins
-    where email = lower(p_email) and password_hash = public.jps_hash(p_password)
+    select 1 from public.admins a0
+    where a0.email = lower(p_email) and a0.password_hash = public.jps_hash(p_password)
   ) then
     raise exception 'Not authorized';
   end if;
