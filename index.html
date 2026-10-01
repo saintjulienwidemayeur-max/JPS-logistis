@@ -388,7 +388,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       </nav>
 
       <div class="flex items-center gap-1.5 sm:gap-3">
-        <button type="button" data-install aria-label="Installer l'app" class="hidden items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border-[1.5px] border-flare text-flare font-semibold text-[12px] sm:text-[13.5px] hover:bg-flare hover:text-white transition-colors whitespace-nowrap">
+        <button type="button" data-install data-display="inline-flex" aria-label="Installer l'app" class="jps-install-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
           Installer
         </button>
@@ -413,7 +413,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       <a href="#suivi" class="py-2.5 border-b border-token">Suivre un colis</a>
       <a href="#contact" class="py-2.5 border-b border-token">Contact</a>
       <a href="#" data-open-client class="py-2.5 border-b border-token font-semibold text-navy-mid">Espace Client</a>
-      <button type="button" data-install class="hidden py-2.5 text-left font-semibold text-flare">Installer l'app</button>
+      <button type="button" data-install data-display="block" class="jps-install-link">Installer l'app</button>
     </nav>
   </div>
 </header>
@@ -2058,28 +2058,48 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     okEl.classList.remove('hidden');
   });
 </script>
-<div id="installModal" class="hidden fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4" style="background:rgba(10,20,50,0.55);">
-  <div class="w-full max-w-sm bg-white rounded-3xl p-6 text-center shadow-2xl">
-    <img src="/icon-192.png" alt="" class="w-16 h-16 mx-auto rounded-2xl">
-    <h2 class="mt-4 stencil text-[22px] text-ink leading-tight" style="font-weight:800;">Installez l'application</h2>
-    <p class="mt-2 text-[14px] text-soft leading-relaxed">Accès rapide à votre espace, suivi de vos colis et notifications dès qu'ils changent de statut.</p>
-    <button type="button" id="installModalYes" class="mt-5 w-full px-6 py-3 rounded-full bg-flare hover:bg-flare-hot text-white font-semibold text-[15px] transition-colors">Installer l'application</button>
-    <button type="button" id="installModalLater" class="mt-3 text-[13.5px] text-soft underline decoration-dotted">Plus tard</button>
+<div id="installModal" class="jps-modal" hidden>
+  <div class="jps-modal-card">
+    <img src="/icon-192.png" alt="" class="jps-modal-icon">
+    <h2 class="jps-modal-title">Installez l'application</h2>
+    <p class="jps-modal-text">Accès rapide à votre espace, suivi de vos colis et notifications dès qu'ils changent de statut.</p>
+    <button type="button" id="installModalYes" class="jps-btn-primary">Installer l'application</button>
+    <button type="button" id="installModalLater" class="jps-btn-link">Plus tard</button>
   </div>
 </div>
-<div id="installHelp" class="hidden fixed inset-x-4 bottom-4 z-[70] max-w-md mx-auto bg-white rounded-2xl border-2 border-navy-mid p-5 shadow-2xl text-left">
-  <p class="font-bold text-ink text-[15px]">Installer JP's Logistics</p>
-  <p id="installHelpText" class="mt-2 text-[14px] text-soft leading-relaxed"></p>
-  <button type="button" id="installHelpClose" class="mt-4 px-5 py-2 rounded-full bg-flare text-white font-semibold text-[14px]">OK</button>
+<div id="installHelp" class="jps-help" hidden>
+  <p class="jps-help-title">Installer JP's Logistics</p>
+  <p id="installHelpText" class="jps-help-text"></p>
+  <button type="button" id="installHelpClose" class="jps-btn-primary jps-btn-small">OK</button>
 </div>
+<style>
+.jps-install-btn{display:none;align-items:center;justify-content:center;gap:6px;padding:6px 12px;border-radius:999px;border:1.5px solid #FF5500;background:#fff;color:#FF5500;font:600 12px/1 Inter,system-ui,sans-serif;white-space:nowrap;cursor:pointer}
+.jps-install-btn:hover{background:#FF5500;color:#fff}
+@media(min-width:640px){.jps-install-btn{padding:8px 16px;font-size:13.5px}}
+.jps-install-link{display:none;width:100%;text-align:left;padding:10px 0;background:none;border:0;color:#FF5500;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
+.jps-modal[hidden],.jps-help[hidden]{display:none}
+.jps-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(10,20,50,.55)}
+@media(min-width:640px){.jps-modal{align-items:center}}
+.jps-modal-card{width:100%;max-width:384px;background:#fff;border-radius:24px;padding:24px;text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);font-family:Inter,system-ui,sans-serif}
+.jps-modal-icon{width:64px;height:64px;margin:0 auto;border-radius:16px;display:block}
+.jps-modal-title{margin:16px 0 0;font-size:22px;font-weight:800;color:#0B1B3F;line-height:1.2}
+.jps-modal-text{margin:8px 0 0;font-size:14px;line-height:1.6;color:#5B6479}
+.jps-btn-primary{display:block;width:100%;margin-top:20px;padding:12px 24px;border:0;border-radius:999px;background:#FF5500;color:#fff;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
+.jps-btn-primary:hover{background:#E64A00}
+.jps-btn-small{display:inline-block;width:auto;margin-top:16px;padding:8px 20px;font-size:14px}
+.jps-btn-link{margin-top:12px;background:none;border:0;color:#5B6479;font:13.5px Inter,system-ui,sans-serif;text-decoration:underline dotted;cursor:pointer}
+.jps-help{position:fixed;left:16px;right:16px;bottom:16px;z-index:1001;max-width:448px;margin:0 auto;background:#fff;border:2px solid #0D2B80;border-radius:16px;padding:20px;text-align:left;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);font-family:Inter,system-ui,sans-serif}
+.jps-help-title{margin:0;font-weight:700;font-size:15px;color:#0B1B3F}
+.jps-help-text{margin:8px 0 0;font-size:14px;line-height:1.6;color:#5B6479}
+</style>
 <script>
 (function(){
   var deferred = null;
   var btns = document.querySelectorAll('[data-install]');
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  function show(){ btns.forEach(function(b){ b.classList.remove('hidden'); b.classList.add('inline-flex'); }); }
-  function hide(){ btns.forEach(function(b){ b.classList.add('hidden'); b.classList.remove('inline-flex'); }); }
+  function show(){ btns.forEach(function(b){ b.style.display = b.getAttribute('data-display') || 'inline-flex'; }); }
+  function hide(){ btns.forEach(function(b){ b.style.display = 'none'; }); }
   if (isStandalone) return;
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
     navigator.serviceWorker.register('/sw.js').catch(function(){});
@@ -2095,18 +2115,18 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   }
   function maybeShowModal(){
     if (hasAccount() || recentlyDismissed() || !(deferred || isIOS)) return;
-    setTimeout(function(){ if (!hasAccount()) modal.classList.remove('hidden'); }, 2500);
+    setTimeout(function(){ if (!hasAccount()) modal.hidden = false; }, 2500);
   }
   window.addEventListener('beforeinstallprompt', maybeShowModal);
   if (isIOS) maybeShowModal();
-  function closeModal(){ modal.classList.add('hidden'); try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){} }
+  function closeModal(){ modal.hidden = true; try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){} }
   document.getElementById('installModalLater').addEventListener('click', closeModal);
   document.getElementById('installModalYes').addEventListener('click', function(){
-    modal.classList.add('hidden');
+    modal.hidden = true;
     var b = document.querySelector('[data-install]'); if (b) b.click();
   });
   var help = document.getElementById('installHelp');
-  document.getElementById('installHelpClose').addEventListener('click', function(){ help.classList.add('hidden'); });
+  document.getElementById('installHelpClose').addEventListener('click', function(){ help.hidden = true; });
   btns.forEach(function(b){
     b.addEventListener('click', async function(){
       if (deferred) {
@@ -2117,7 +2137,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
         document.getElementById('installHelpText').textContent = isIOS
           ? "Appuyez sur le bouton Partager (carré avec une flèche), puis sur « Sur l'écran d'accueil »."
           : "Ouvrez le menu de votre navigateur, puis choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».";
-        help.classList.remove('hidden');
+        help.hidden = false;
       }
     });
   });
