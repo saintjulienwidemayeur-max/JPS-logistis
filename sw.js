@@ -9,27 +9,29 @@
 // it and push notifications (daily greeting + shipment status changes)
 // will work.
 
-const CACHE_NAME = 'jps-logistics-v1';
+const CACHE_NAME = 'jps-logistics-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
 });
 
-// Basic offline cache for the app shell (best-effort — not critical)
+// Network-first: always serve the latest site, fall back to cache only when offline.
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      }).catch(() => cached);
-    })
+    fetch(event.request).then((response) => {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });
 
@@ -40,8 +42,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || "JP's Logistics & More", {
       body: data.body || '',
-      icon: 'https://wzlwnhmboqunflqzvlcb.supabase.co/favicon.ico', // replace with your own hosted icon once deployed
-      badge: undefined
+      icon: '/icon-192.png'
     })
   );
 });
