@@ -75,7 +75,70 @@ async function sendToAll(rows: { subscription: any }[], title: string, body: str
   );
 }
 
+// ---------- E-mail design (shared look for every e-mail) ----------
+// The logo is loaded from your website: SITE_URL/logo.png (set the SITE_URL
+// secret if your site is not at https://jpslogistics.me).
+const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://jpslogistics.me").replace(/\/$/, "");
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+function layout(title: string, inner: string, cta?: { label: string; url: string }, preheader = ""): string {
+  const button = cta
+    ? `<tr><td align="center" style="background:#ffffff;padding:6px 28px 30px;">
+         <a href="${cta.url}" style="display:inline-block;background:#FF5500;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:999px;font-family:${FONT};">${cta.label}</a>
+       </td></tr>`
+    : `<tr><td style="background:#ffffff;height:22px;line-height:22px;font-size:0;">&nbsp;</td></tr>`;
+  return `<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
+<body style="margin:0;padding:0;background:#EEF1F8;">
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;">${preheader}</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EEF1F8;padding:24px 12px;">
+<tr><td align="center">
+  <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+    <tr><td align="center" style="background:#ffffff;border-radius:18px 18px 0 0;padding:28px 28px 20px;border-bottom:4px solid #FF5500;">
+      <img src="${SITE_URL}/logo.png" alt="JP's Logistics &amp; More" width="150" style="display:block;width:150px;max-width:60%;height:auto;border:0;outline:none;">
+    </td></tr>
+    <tr><td style="background:#ffffff;padding:28px 28px 8px;font-family:${FONT};color:#1B2540;font-size:15px;line-height:1.65;">
+      <h1 style="margin:0 0 14px;font-size:22px;line-height:1.25;color:#0D2B80;font-family:${FONT};">${title}</h1>
+      ${inner}
+    </td></tr>
+    ${button}
+    <tr><td align="center" style="background:#0D2B80;border-radius:0 0 18px 18px;padding:20px 24px;font-family:${FONT};color:#C9D4F5;font-size:12px;line-height:1.7;">
+      <b style="color:#ffffff;">JP's Logistics &amp; More LLC</b><br>
+      8125 NW 67th St, Miami, FL 33166 &middot; +1 (786) 424-8025<br>
+      <a href="mailto:contact@jpslogistics.me" style="color:#C9D4F5;">contact@jpslogistics.me</a>
+    </td></tr>
+    <tr><td align="center" style="padding:14px;font-family:${FONT};color:#8A93A8;font-size:11px;">Vous recevez cet e-mail car vous avez un compte chez JP's Logistics &amp; More LLC.</td></tr>
+  </table>
+</td></tr></table></body></html>`;
+}
+
 const usd = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const STEP_NAMES = ["Reçu à Miami", "En transit / douane", "Arrivé en Haïti", "Prêt pour retrait"];
+const STATUS_COPY: Record<number, { title: string; text: string }> = {
+  0: { title: "Votre colis est arrivé à Miami", text: "Nous avons bien reçu votre colis à notre dépôt de Miami. Il sera bientôt préparé pour l'expédition." },
+  1: { title: "Votre colis est en route", text: "Votre colis est en transit et passe par la douane. Nous vous prévenons dès son arrivée en Haïti." },
+  2: { title: "Votre colis est arrivé en Haïti", text: "Bonne nouvelle : votre colis est arrivé en Haïti. Il sera bientôt prêt pour le retrait ou la livraison." },
+  3: { title: "Votre colis est prêt !", text: "Votre colis est prêt pour le retrait / la livraison. Contactez-nous pour organiser la remise." },
+};
+
+function progressBar(current: number): string {
+  const cells = STEP_NAMES.map((name, i) => {
+    const done = i <= current;
+    return `<td width="25%" align="center" style="padding:0 3px;font-family:${FONT};">
+      <div style="height:6px;border-radius:3px;background:${done ? "#FF5500" : "#DDE3F0"};"></div>
+      <div style="margin-top:8px;font-size:11px;line-height:1.3;color:${done ? "#0D2B80" : "#9AA3B8"};font-weight:${i === current ? "bold" : "normal"};">${name}</div>
+    </td>`;
+  }).join("");
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 6px;"><tr>${cells}</tr></table>`;
+}
+
+function detailRow(label: string, value: string): string {
+  return `<tr>
+    <td style="padding:9px 0;border-bottom:1px solid #E6EAF4;color:#6B7490;font-size:13px;font-family:${FONT};">${label}</td>
+    <td align="right" style="padding:9px 0;border-bottom:1px solid #E6EAF4;color:#1B2540;font-size:14px;font-weight:bold;font-family:${FONT};">${value}</td>
+  </tr>`;
+}
 
 // E-mail the client through Brevo when a shipment is added or its status changes.
 async function emailClient(supabase: any, record: any, label: string, isNew: boolean): Promise<boolean> {
@@ -84,30 +147,44 @@ async function emailClient(supabase: any, record: any, label: string, isNew: boo
     const { data: client } = await supabase.from("clients").select("name,email").eq("id", record.client_id).maybeSingle();
     if (!client?.email) return false;
 
+    const status = Math.min(Math.max(Number(record.status) || 0, 0), 3);
+    const copy = STATUS_COPY[status];
+    const first = String(client.name ?? "").split(" ")[0];
     const lbs = parseFloat(String(record.weight ?? "").replace(",", ".")) || 0;
+
+    let rows = detailRow("N° de suivi", `<span style="font-family:'Courier New',monospace;">${record.tracking_number}</span>`);
+    if (record.description) rows += detailRow("Description", String(record.description));
+    if (record.type) rows += detailRow("Type", String(record.type));
+    if (record.weight) rows += detailRow("Poids", String(record.weight));
+    rows += detailRow("Statut", `<span style="color:#FF5500;">${label}</span>`);
+
     let priceHtml = "";
     if (record.price_per_lb !== null && record.price_per_lb !== undefined) {
-      const total = lbs * Number(record.price_per_lb) + Number(record.logistics_fee ?? 0);
-      priceHtml = `<p style="color:#6b7490;font-size:13px;margin:12px 0 0;">${lbs} lbs × ${usd(Number(record.price_per_lb))} + frais de logistique ${usd(Number(record.logistics_fee ?? 0))}</p>
-        <p style="font-size:18px;font-weight:bold;color:#0D2B80;margin:4px 0 0;">Total à payer : ${usd(total)}</p>`;
+      const fee = Number(record.logistics_fee ?? 0);
+      const total = lbs * Number(record.price_per_lb) + fee;
+      priceHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;background:#F4F7FF;border-radius:14px;"><tr><td style="padding:16px 18px;font-family:${FONT};">
+          <div style="font-size:13px;color:#6B7490;">${lbs} lbs × ${usd(Number(record.price_per_lb))} + frais de logistique ${usd(fee)}</div>
+          <div style="font-size:20px;font-weight:bold;color:#0D2B80;margin-top:4px;">Total à payer : ${usd(total)}</div>
+        </td></tr></table>`;
     }
-    const first = String(client.name ?? "").split(" ")[0];
+
+    const title = isNew ? "Nouveau colis enregistré" : copy.title;
+    const intro = isNew
+      ? `Un nouveau colis vient d'être enregistré à votre nom. ${copy.text}`
+      : copy.text;
+    const html = layout(
+      title,
+      `<p style="margin:0 0 4px;">Bonjour ${first},</p>
+       <p style="margin:0;">${intro}</p>
+       ${progressBar(status)}
+       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${rows}</table>
+       ${priceHtml}`,
+      { label: "Suivre mon colis", url: `${SITE_URL}/#suivi` },
+      `${record.tracking_number} : ${label}`,
+    );
     const subject = isNew
-      ? `Nouveau colis enregistré ${record.tracking_number} — JP's Logistics & More LLC`
-      : `Mise à jour de votre colis ${record.tracking_number} — JP's Logistics & More LLC`;
-    const html = `<!doctype html><html><body style="margin:0;background:#f3f5fa;font-family:Arial,Helvetica,sans-serif;">
-      <div style="max-width:520px;margin:0 auto;padding:24px;">
-        <div style="background:#0D2B80;border-radius:16px 16px 0 0;padding:20px 24px;color:#fff;font-size:18px;font-weight:bold;">JP's Logistics &amp; More LLC</div>
-        <div style="background:#fff;border-radius:0 0 16px 16px;padding:28px 24px;color:#1b2540;font-size:15px;line-height:1.6;">
-          <p>Bonjour ${first},</p>
-          <p>${isNew ? "Un nouveau colis a été enregistré pour vous." : "Le statut de votre colis a changé."}</p>
-          <p style="margin:0;"><b>N° de suivi :</b> ${record.tracking_number}</p>
-          <p style="margin:0;"><b>Statut :</b> ${label}</p>
-          ${priceHtml}
-          <p style="margin-top:20px;">Merci pour votre confiance.</p>
-        </div>
-        <p style="text-align:center;color:#8a93a8;font-size:12px;margin-top:16px;">JP's Logistics &amp; More LLC · Miami, FL · contact@jpslogistics.me</p>
-      </div></body></html>`;
+      ? `Nouveau colis ${record.tracking_number} — JP's Logistics & More LLC`
+      : `${copy.title} (${record.tracking_number}) — JP's Logistics & More LLC`;
 
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
