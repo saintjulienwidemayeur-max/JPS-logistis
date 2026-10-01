@@ -388,6 +388,10 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       </nav>
 
       <div class="flex items-center gap-3">
+        <button type="button" data-install class="hidden items-center gap-2 px-4 py-2.5 rounded-full border-2 border-flare text-flare font-semibold text-[14px] hover:bg-flare hover:text-white transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          Installer l'app
+        </button>
         <a href="#" data-open-client class="hidden md:inline-flex items-center px-5 py-2.5 rounded-full border-2 border-navy-mid text-navy-mid font-semibold text-[14px] hover:bg-navy-mid hover:text-white transition-colors">
           Espace Client
         </a>
@@ -408,7 +412,8 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       <a href="#services" class="py-2.5 border-b border-token">Services</a>
       <a href="#suivi" class="py-2.5 border-b border-token">Suivre un colis</a>
       <a href="#contact" class="py-2.5 border-b border-token">Contact</a>
-      <a href="#" data-open-client class="py-2.5 font-semibold text-navy-mid">Espace Client</a>
+      <a href="#" data-open-client class="py-2.5 border-b border-token font-semibold text-navy-mid">Espace Client</a>
+      <button type="button" data-install class="hidden py-2.5 text-left font-semibold text-flare">Installer l'app</button>
     </nav>
   </div>
 </header>
@@ -790,6 +795,20 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
           <button type="submit" class="mt-1 w-full px-6 py-3.5 rounded-full bg-flare hover:bg-flare-hot text-white font-semibold text-[15px] transition-colors">Créer mon compte</button>
         </form>
         <button type="button" class="mt-5 text-[14px] text-soft underline decoration-dotted" data-step-back>Retour</button>
+      </div>
+
+      <div id="signupStepOtp" class="hidden">
+        <h1 class="stencil font-800 text-[26px] text-ink leading-tight" style="font-weight:800;">Vérification</h1>
+        <p class="mt-2 text-soft text-[14.5px] leading-relaxed">Un code à 6 chiffres a été envoyé à <span id="signupOtpEmail" class="font-semibold text-ink"></span>.</p>
+        <p class="mt-3 text-[13px] text-navy-mid font-semibold" id="signupOtpDemo"></p>
+        <form id="signupOtpForm" class="mt-5 flex flex-col gap-4 text-left">
+          <input type="text" id="signupOtpInput" required maxlength="6" inputmode="numeric" autocomplete="one-time-code" class="mono-track text-center tracking-[0.4em] w-full px-4 py-3 rounded-xl border-2 border-token focus:border-navy-mid outline-none text-[20px]" placeholder="------">
+          <p id="signupOtpError" class="hidden text-[13.5px] text-flare font-medium"></p>
+          <button type="submit" class="mt-1 w-full px-6 py-3.5 rounded-full bg-flare hover:bg-flare-hot text-white font-semibold text-[15px] transition-colors">Vérifier et créer mon compte</button>
+        </form>
+        <button type="button" id="signupOtpResend" class="mt-5 text-[14px] text-navy-mid font-semibold underline decoration-dotted">Renvoyer le code</button>
+        <br>
+        <button type="button" id="signupOtpBack" class="mt-3 text-[14px] text-soft underline decoration-dotted">Retour</button>
       </div>
 
       <div id="signupStepWelcome" class="hidden">
@@ -1300,7 +1319,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   }
 
   function resetSignupFlow(){
-    ['signupStep1','signupStep2','signupStep3','signupStep4','signupStepWelcome'].forEach(id => {
+    ['signupStep1','signupStep2','signupStep3','signupStep4','signupStepOtp','signupStepWelcome'].forEach(id => {
       document.getElementById(id).classList.add('hidden');
     });
     document.getElementById('signupStep1').classList.remove('hidden');
@@ -1386,24 +1405,65 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     });
   });
 
+  /* ---- Signup OTP ----
+     TODO: replace sendSignupOtp() with a call to the real OTP API once it
+     exists (it should email/SMS `code` to `email`). Until then the code is
+     displayed on screen, same as the "mot de passe oublié" flow. */
+  let pendingSignupOtp = null;
+  async function sendSignupOtp(email){
+    pendingSignupOtp = makeOtp();
+    document.getElementById('signupOtpEmail').textContent = email;
+    document.getElementById('signupOtpDemo').textContent = 'Code de démonstration : ' + pendingSignupOtp;
+    document.getElementById('signupOtpInput').value = '';
+    document.getElementById('signupOtpError').classList.add('hidden');
+  }
+
   document.getElementById('signupCredsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const errEl = document.getElementById('signupError');
     errEl.classList.add('hidden');
     const submitBtn = e.target.querySelector('button[type=submit]');
+    const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+
+    setBusy(submitBtn, true, 'Créer mon compte');
+    const { data: existing } = await sb.from('clients').select('id').eq('email', email).maybeSingle();
+    setBusy(submitBtn, false, 'Créer mon compte');
+    if (existing) return showError(errEl, "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.");
+
+    await sendSignupOtp(email);
+    document.getElementById('signupStep4').classList.add('hidden');
+    document.getElementById('signupStepOtp').classList.remove('hidden');
+  });
+
+  document.getElementById('signupOtpResend').addEventListener('click', () => {
+    sendSignupOtp(document.getElementById('signupEmail').value.trim().toLowerCase());
+  });
+  document.getElementById('signupOtpBack').addEventListener('click', () => {
+    document.getElementById('signupStepOtp').classList.add('hidden');
+    document.getElementById('signupStep4').classList.remove('hidden');
+  });
+
+  document.getElementById('signupOtpForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('signupOtpError');
+    errEl.classList.add('hidden');
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    if (document.getElementById('signupOtpInput').value.trim() !== pendingSignupOtp) {
+      return showError(errEl, "Code incorrect, veuillez réessayer.");
+    }
 
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim().toLowerCase();
     const password = document.getElementById('signupPassword').value;
 
-    setBusy(submitBtn, true, 'Créer mon compte');
+    setBusy(submitBtn, true, 'Vérifier et créer mon compte');
     const { data, error } = await sb.rpc('client_signup', {
       p_name: name, p_email: email,
       p_phone: document.getElementById('signupPhone').value.trim(),
       p_address: document.getElementById('signupAddress').value.trim(),
       p_password: password
     });
-    setBusy(submitBtn, false, 'Créer mon compte');
+    setBusy(submitBtn, false, 'Vérifier et créer mon compte');
 
     if (error) {
       const msg = (error.message || '').includes('EMAIL_TAKEN')
@@ -1416,7 +1476,8 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
 
     safeWrite(CLIENT_SESSION_KEY, { id: created.id, email: created.email });
     document.getElementById('welcomeName').textContent = name.split(' ')[0];
-    document.getElementById('signupStep4').classList.add('hidden');
+    pendingSignupOtp = null;
+    document.getElementById('signupStepOtp').classList.add('hidden');
     document.getElementById('signupStepWelcome').classList.remove('hidden');
     document.getElementById('signupLoginLink').classList.add('hidden');
     document.getElementById('signupProgress').classList.add('hidden');
@@ -2003,5 +2064,43 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     okEl.classList.remove('hidden');
   });
 </script>
+<script>
+(function(){
+  var deferred = null;
+  var btns = document.querySelectorAll('[data-install]');
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  function show(){ btns.forEach(function(b){ b.classList.remove('hidden'); b.classList.add('inline-flex'); }); }
+  function hide(){ btns.forEach(function(b){ b.classList.add('hidden'); b.classList.remove('inline-flex'); }); }
+  if (isStandalone) return;
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  }
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred = e; show(); });
+  window.addEventListener('appinstalled', function(){ deferred = null; hide(); });
+  if (isIOS) show(); // iOS has no install prompt API: show manual instructions
+  var help = document.getElementById('installHelp');
+  document.getElementById('installHelpClose').addEventListener('click', function(){ help.classList.add('hidden'); });
+  btns.forEach(function(b){
+    b.addEventListener('click', async function(){
+      if (deferred) {
+        deferred.prompt();
+        try { await deferred.userChoice; } catch(e){}
+        deferred = null; hide();
+      } else {
+        document.getElementById('installHelpText').textContent = isIOS
+          ? "Appuyez sur le bouton Partager (carré avec une flèche), puis sur « Sur l'écran d'accueil »."
+          : "Ouvrez le menu de votre navigateur, puis choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».";
+        help.classList.remove('hidden');
+      }
+    });
+  });
+})();
+</script>
+<div id="installHelp" class="hidden fixed inset-x-4 bottom-4 z-[70] max-w-md mx-auto bg-white rounded-2xl border-2 border-navy-mid p-5 shadow-2xl text-left">
+  <p class="font-bold text-ink text-[15px]">Installer JP's Logistics</p>
+  <p id="installHelpText" class="mt-2 text-[14px] text-soft leading-relaxed"></p>
+  <button type="button" id="installHelpClose" class="mt-4 px-5 py-2 rounded-full bg-flare text-white font-semibold text-[14px]">OK</button>
+</div>
 </body>
 </html>
