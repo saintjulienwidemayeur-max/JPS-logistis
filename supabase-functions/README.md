@@ -16,7 +16,7 @@ notifications become possible.
 Twitter card, and the JSON-LD Organization schema) already point to that
 path — they currently use the placeholder domain
 `https://www.jpslogisticsmore.com`, so find-and-replace that with your
-real domain once you have one, in `jps-logistics-landing.html`. Until
+real domain once you have one, in `index.html`. Until
 both the domain and this file are real and live, Google can't index the
 logo or generate link previews — none of this works from the claude.ai
 preview link or a locally opened file.
