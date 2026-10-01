@@ -162,6 +162,10 @@ create policy "shipments open read"   on public.shipments for select using ( tru
 create policy "shipments open insert" on public.shipments for insert with check ( true );
 create policy "shipments open update" on public.shipments for update using ( true );
 
+-- 2b) PRICING on shipments: USD per lb + logistics fee ---------------
+alter table public.shipments add column if not exists price_per_lb   numeric(10,2);
+alter table public.shipments add column if not exists logistics_fee  numeric(10,2) not null default 0;
+
 -- 3) STAFF (owner / agent / comptable) — never directly readable ---
 create table if not exists public.admins (
   id          uuid primary key default gen_random_uuid(),
