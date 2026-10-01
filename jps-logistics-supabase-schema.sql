@@ -15,9 +15,9 @@
 -- ============================================================
 
 -- Clean slate for the tables this version replaces (safe to run once)
-drop table if exists public.shipments cascade;
-drop table if exists public.client_auth cascade;
-drop table if exists public.clients cascade;
+-- (removed) drop table if exists public.shipments cascade;  <- this used to wipe all data when the file was re-run
+-- (removed) drop table if exists public.client_auth cascade;  <- this used to wipe all data when the file was re-run
+-- (removed) drop table if exists public.clients cascade;  <- this used to wipe all data when the file was re-run
 
 -- 1) CLIENTS ---------------------------------------------------
 -- NOTE: kept broadly readable/writable by the anon key for now, since
@@ -26,7 +26,7 @@ drop table if exists public.clients cascade;
 -- (not just people using the admin panel) could read client name/phone/
 -- address/email. Tighten this once real auth (Brevo-verified OTP, or
 -- Supabase Auth) is wired up — see the note at the bottom of this file.
-create table public.clients (
+create table if not exists public.clients (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
   email       text not null unique,
@@ -86,6 +86,13 @@ begin
     raise exception 'EMAIL_TAKEN';
   end if;
 
+  if length(regexp_replace(coalesce(p_phone, ''), '\D', '', 'g')) > 0 and exists (
+    select 1 from public.clients c1
+    where regexp_replace(coalesce(c1.phone, ''), '\D', '', 'g') = regexp_replace(p_phone, '\D', '', 'g')
+  ) then
+    raise exception 'PHONE_TAKEN';
+  end if;
+
   v_box := 'JPS-' || floor(1000 + random() * 9000)::int;
 
   insert into public.clients (name, email, phone, address, box_number)
@@ -140,7 +147,7 @@ end;
 $$;
 
 -- 2) SHIPMENTS ---------------------------------------------------
-create table public.shipments (
+create table if not exists public.shipments (
   id               uuid primary key default gen_random_uuid(),
   client_id        uuid not null references public.clients(id) on delete cascade,
   tracking_number  text not null,
@@ -327,3 +334,42 @@ select cron.schedule(
 -- Database Webhook (Dashboard > Database > Webhooks, table: shipments,
 -- event: Update, target: the send-notifications Edge Function). No SQL
 -- needed for that part.
+
+
+-- ============================================================
+-- 10) E-MAIL OTP + locked-down signup / password reset
+-- Signup and password reset are now done by the `client-auth` Edge
+-- Function (service_role) AFTER it verified a code e-mailed through
+-- Brevo. The browser can no longer call those two RPCs directly.
+-- ============================================================
+create table if not exists public.email_otps (
+  id          uuid primary key default gen_random_uuid(),
+  email       text not null,
+  purpose     text not null check (purpose in ('signup','reset')),
+  code_hash   text not null,
+  attempts    int  not null default 0,
+  used        boolean not null default false,
+  expires_at  timestamptz not null,
+  created_at  timestamptz not null default now()
+);
+create index if not exists email_otps_lookup on public.email_otps (email, purpose, created_at desc);
+alter table public.email_otps enable row level security;
+-- No policies on purpose: only the service_role (Edge Function) can touch it.
+
+-- One account per phone number (digits only)
+create or replace function public.phone_in_use(p_phone text)
+returns boolean
+language sql security definer set search_path = public as $$
+  select exists (
+    select 1 from public.clients c
+    where length(regexp_replace(coalesce(p_phone, ''), '\D', '', 'g')) > 0
+      and regexp_replace(coalesce(c.phone, ''), '\D', '', 'g') = regexp_replace(p_phone, '\D', '', 'g')
+  );
+$$;
+
+revoke execute on function public.client_signup(text, text, text, text, text) from public, anon, authenticated;
+revoke execute on function public.client_reset_password(text, text)           from public, anon, authenticated;
+revoke execute on function public.phone_in_use(text)                          from public, anon, authenticated;
+grant  execute on function public.client_signup(text, text, text, text, text) to service_role;
+grant  execute on function public.client_reset_password(text, text)           to service_role;
+grant  execute on function public.phone_in_use(text)                          to service_role;
