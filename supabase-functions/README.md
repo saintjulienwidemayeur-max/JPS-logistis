@@ -92,3 +92,9 @@ address/domain must be verified in Brevo (Senders, Domains & dedicated IPs).
 4. Run section 10 of `jps-logistics-supabase-schema.sql` in the SQL Editor
    (`email_otps` table, one-account-per-phone check, and revoking direct access
    to the signup/reset RPCs from the browser).
+
+### E-mail design / logo
+All e-mails share one design (logo header, orange accent, navy footer). The logo is
+loaded from `SITE_URL/logo.png`. If your site is not at `https://jpslogistics.me`,
+add a secret `SITE_URL` (e.g. `https://your-site.onrender.com`) so the logo and the
+"Suivre mon colis" button point to the right place.
