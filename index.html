@@ -457,13 +457,12 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
         <span class="rivet hidden sm:block"></span>
       </div>
       <form id="trackForm" class="flex flex-col sm:flex-row gap-3">
-        <input id="trackInput" type="text" placeholder="ex. JPS-2026-00123" autocomplete="off"
+        <input id="trackInput" type="text" placeholder="Entrez votre numéro de suivi" autocomplete="off"
           class="mono-track flex-1 px-5 py-3.5 rounded-xl bg-white/95 text-ink placeholder:text-ink/40 font-semibold text-[15px] border-2 border-transparent focus:border-flare outline-none">
         <button type="submit" class="px-7 py-3.5 rounded-xl bg-flare hover:bg-flare-hot text-white font-semibold text-[15px] transition-colors whitespace-nowrap">
           Suivre mon colis
         </button>
       </form>
-      <p class="mt-3 text-[13px] text-white/55">Démo : essayez <button type="button" class="underline decoration-dotted demo-fill" data-id="JPS-2026-00123">JPS-2026-00123</button>, <button type="button" class="underline decoration-dotted demo-fill" data-id="JPS-2026-00456">JPS-2026-00456</button> ou <button type="button" class="underline decoration-dotted demo-fill" data-id="JPS-2026-00789">JPS-2026-00789</button></p>
 
       <!-- result -->
       <div id="trackResult" class="hidden mt-7 pt-6 border-t border-dashed border-white/25"></div>
@@ -1161,12 +1160,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     </div>
   `).join('');
 
-  // Tracking demo
-  const demoData = {
-    "JPS-2026-00123": { current: 1, updated: "16 sept. 2026, 14:20" },
-    "JPS-2026-00456": { current: 3, updated: "12 sept. 2026, 09:05" },
-    "JPS-2026-00789": { current: 2, updated: "15 sept. 2026, 18:40" }
-  };
+  // Package tracking (live data from Supabase)
   const steps = [
     { label: "Colis reçu au dépôt de Miami", sub: "Package received" },
     { label: "En transit / en douane", sub: "In transit / customs" },
@@ -1178,30 +1172,56 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   const input = document.getElementById('trackInput');
   const result = document.getElementById('trackResult');
 
-  document.querySelectorAll('.demo-fill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      input.value = btn.dataset.id;
-      form.dispatchEvent(new Event('submit', { cancelable: true }));
-    });
-  });
+  const escHtml = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = input.value.trim().toUpperCase();
-    const entry = demoData[id];
+    const submitBtn = form.querySelector('button[type=submit]');
     result.classList.remove('hidden');
 
-    if (!entry) {
+    if (!id) {
+      result.innerHTML = `<p class="text-white/85 text-[15px]">Entrez votre numéro de suivi.</p>`;
+      return;
+    }
+
+    submitBtn.disabled = true;
+    result.innerHTML = `<p class="text-white/70 text-[15px]">Recherche en cours…</p>`;
+    const { data: rows, error } = await sb.from('shipments')
+      .select('tracking_number, type, description, weight, status, created_at, updated_at')
+      .ilike('tracking_number', id.replace(/[\\%_]/g, '\\$&'))
+      .limit(1);
+    submitBtn.disabled = false;
+
+    if (error) {
+      result.innerHTML = `<p class="text-white/85 text-[15px]">Le service est momentanément indisponible. Veuillez réessayer.</p>`;
+      return;
+    }
+    const ship = rows && rows[0];
+
+    if (!ship) {
       result.innerHTML = `
-        <p class="text-white/85 text-[15px]">Aucun colis trouvé pour <span class="mono-track font-semibold">${id || 'ce numéro'}</span>. Vérifiez le numéro ou contactez le dépôt sur WhatsApp.</p>
+        <p class="text-white/85 text-[15px]">Aucun colis trouvé pour <span class="mono-track font-semibold">${escHtml(id)}</span>. Vérifiez le numéro ou contactez le dépôt sur WhatsApp.</p>
       `;
       return;
     }
 
+    const entry = {
+      current: Math.min(Math.max(Number(ship.status) || 0, 0), steps.length - 1),
+      updated: fmtDate(ship.updated_at || ship.created_at)
+    };
+    const details = [
+      ['Type', ship.type],
+      ['Description', ship.description],
+      ['Poids', ship.weight],
+      ['Reçu le', fmtDate(ship.created_at)]
+    ].filter(d => d[1]).map(d => `
+      <div><p class="text-white/45 text-[11.5px] uppercase tracking-wide">${d[0]}</p><p class="text-white/90 text-[14px] font-medium">${escHtml(d[1])}</p></div>
+    `).join('');
     const pct = (entry.current / (steps.length - 1)) * 100;
     result.innerHTML = `
       <div class="flex items-center justify-between mb-6">
-        <p class="text-white/90 font-semibold mono-track">${id}</p>
+        <p class="text-white/90 font-semibold mono-track">${escHtml(ship.tracking_number)}</p>
         <p class="text-white/50 text-[13px]">Mis à jour : ${entry.updated}</p>
       </div>
 
@@ -1221,6 +1241,8 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
           </div>
         `).join('')}
       </div>
+
+      ${details ? `<div class="mt-7 pt-5 border-t border-dashed border-white/20 grid grid-cols-2 md:grid-cols-4 gap-4">${details}</div>` : ''}
     `;
   });
 
