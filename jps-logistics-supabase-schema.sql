@@ -15,9 +15,9 @@
 -- ============================================================
 
 -- Clean slate for the tables this version replaces (safe to run once)
-drop table if exists public.shipments cascade;
-drop table if exists public.client_auth cascade;
-drop table if exists public.clients cascade;
+-- (removed) drop table if exists public.shipments cascade;  <- this used to wipe all data when the file was re-run
+-- (removed) drop table if exists public.client_auth cascade;  <- this used to wipe all data when the file was re-run
+-- (removed) drop table if exists public.clients cascade;  <- this used to wipe all data when the file was re-run
 
 -- 1) CLIENTS ---------------------------------------------------
 -- NOTE: kept broadly readable/writable by the anon key for now, since
@@ -26,7 +26,7 @@ drop table if exists public.clients cascade;
 -- (not just people using the admin panel) could read client name/phone/
 -- address/email. Tighten this once real auth (Brevo-verified OTP, or
 -- Supabase Auth) is wired up — see the note at the bottom of this file.
-create table public.clients (
+create table if not exists public.clients (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
   email       text not null unique,
@@ -147,7 +147,7 @@ end;
 $$;
 
 -- 2) SHIPMENTS ---------------------------------------------------
-create table public.shipments (
+create table if not exists public.shipments (
   id               uuid primary key default gen_random_uuid(),
   client_id        uuid not null references public.clients(id) on delete cascade,
   tracking_number  text not null,
