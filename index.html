@@ -1601,8 +1601,29 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     document.getElementById('loginEmail').value = pendingResetEmail;
   });
 
+  /* ---- Stay logged in until the client logs out ----
+     The session lives in localStorage (survives closing the browser/app).
+     Inside the installed app we open the dashboard straight away; in a
+     normal browser the nav button turns into "Mon espace". */
+  function updateNavLabel(){
+    const loggedIn = !!safeRead(CLIENT_SESSION_KEY, null);
+    document.querySelectorAll('[data-open-client]:not([data-signup])').forEach(el => {
+      el.textContent = loggedIn ? 'Mon espace' : 'Espace Client';
+    });
+  }
+  updateNavLabel();
+  window.addEventListener('jps-login', updateNavLabel);
+  const runsAsApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  // Wait for 'load' so every const in this script (ADMIN_SESSION_KEY...) is initialised.
+  window.addEventListener('load', () => {
+    if (runsAsApp && safeRead(CLIENT_SESSION_KEY, null) && !safeRead(ADMIN_SESSION_KEY, null, sessionStorage)) {
+      openClientPage();
+    }
+  });
+
   document.getElementById('logoutBtn').addEventListener('click', () => {
     try { localStorage.removeItem(CLIENT_SESSION_KEY); } catch(e){}
+    updateNavLabel();
     resetLoginFlow();
     resetSignupFlow();
     showView(loginView);
