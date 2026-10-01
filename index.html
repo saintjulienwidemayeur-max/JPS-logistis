@@ -731,7 +731,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
 
       <div id="forgotStepReset" class="hidden">
         <h1 class="stencil font-800 text-[26px] text-ink leading-tight" style="font-weight:800;">Nouveau mot de passe</h1>
-        <p class="mt-2 text-soft text-[14.5px] leading-relaxed">Un code à 6 chiffres a été envoyé à <span id="forgotResetEmail" class="font-semibold text-ink"></span>.</p>
+        <p class="mt-2 text-soft text-[14.5px] leading-relaxed">Si un compte existe, un code à 6 chiffres a été envoyé à <span id="forgotResetEmail" class="font-semibold text-ink"></span>.</p>
         <p class="mt-3 text-[13px] text-navy-mid font-semibold" id="forgotOtpDemo"></p>
         <form id="forgotResetForm" class="mt-5 flex flex-col gap-4 text-left">
           <input type="text" id="forgotOtpInput" required maxlength="6" inputmode="numeric" class="mono-track text-center tracking-[0.4em] w-full px-4 py-3 rounded-xl border-2 border-token focus:border-navy-mid outline-none text-[20px]" placeholder="------">
@@ -1427,17 +1427,49 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     });
   });
 
-  /* ---- Signup OTP ----
-     TODO: replace sendSignupOtp() with a call to the real OTP API once it
-     exists (it should email/SMS `code` to `email`). Until then the code is
-     displayed on screen, same as the "mot de passe oublié" flow. */
-  let pendingSignupOtp = null;
+  /* ---- E-mail OTP (sent by the `client-auth` Edge Function through Brevo) ---- */
+  const AUTH_FN_URL = SUPABASE_URL + '/functions/v1/client-auth';
+  const SB_PUBLISHABLE_KEY = 'sb_publishable__zb7psxIbYlkOnmLhhVXRQ_OHjEGKPW';
+  async function callAuthFn(body){
+    try {
+      const r = await fetch(AUTH_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SB_PUBLISHABLE_KEY },
+        body: JSON.stringify(body)
+      });
+      let data = {};
+      try { data = await r.json(); } catch(e){}
+      return { ok: r.ok, status: r.status, data };
+    } catch (e) {
+      return { ok: false, status: 0, data: { error: 'NETWORK' } };
+    }
+  }
+  function authErrorMessage(code){
+    switch (code) {
+      case 'EMAIL_TAKEN': return "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.";
+      case 'PHONE_TAKEN': return "Un compte existe déjà avec ce numéro de téléphone.";
+      case 'RATE_LIMIT': return "Trop de demandes. Patientez une minute puis réessayez.";
+      case 'INVALID_CODE': return "Code incorrect ou expiré, veuillez réessayer.";
+      case 'TOO_MANY_ATTEMPTS': return "Trop d'essais. Demandez un nouveau code.";
+      case 'INVALID_EMAIL': return "Adresse e-mail invalide.";
+      case 'SEND_FAILED': return "L'e-mail n'a pas pu être envoyé. Réessayez dans un instant.";
+      case 'NETWORK': return "Connexion impossible. Vérifiez votre internet et réessayez.";
+      default: return "Une erreur est survenue, veuillez réessayer.";
+    }
+  }
+
   async function sendSignupOtp(email){
-    pendingSignupOtp = makeOtp();
-    document.getElementById('signupOtpEmail').textContent = email;
-    document.getElementById('signupOtpDemo').textContent = 'Code de démonstration : ' + pendingSignupOtp;
-    document.getElementById('signupOtpInput').value = '';
-    document.getElementById('signupOtpError').classList.add('hidden');
+    const res = await callAuthFn({
+      action: 'send_otp', purpose: 'signup', email,
+      phone: document.getElementById('signupPhone').value.trim()
+    });
+    if (res.ok) {
+      document.getElementById('signupOtpEmail').textContent = email;
+      document.getElementById('signupOtpDemo').textContent = '';
+      document.getElementById('signupOtpInput').value = '';
+      document.getElementById('signupOtpError').classList.add('hidden');
+    }
+    return res;
   }
 
   document.getElementById('signupCredsForm').addEventListener('submit', async (e) => {
@@ -1448,17 +1480,19 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     const email = document.getElementById('signupEmail').value.trim().toLowerCase();
 
     setBusy(submitBtn, true, 'Créer mon compte');
-    const { data: existing } = await sb.from('clients').select('id').eq('email', email).maybeSingle();
+    const res = await sendSignupOtp(email);
     setBusy(submitBtn, false, 'Créer mon compte');
-    if (existing) return showError(errEl, "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt.");
+    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
 
-    await sendSignupOtp(email);
     document.getElementById('signupStep4').classList.add('hidden');
     document.getElementById('signupStepOtp').classList.remove('hidden');
   });
 
-  document.getElementById('signupOtpResend').addEventListener('click', () => {
-    sendSignupOtp(document.getElementById('signupEmail').value.trim().toLowerCase());
+  document.getElementById('signupOtpResend').addEventListener('click', async () => {
+    const errEl = document.getElementById('signupOtpError');
+    const res = await sendSignupOtp(document.getElementById('signupEmail').value.trim().toLowerCase());
+    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
+    document.getElementById('signupOtpDemo').textContent = 'Un nouveau code vient d\'être envoyé.';
   });
   document.getElementById('signupOtpBack').addEventListener('click', () => {
     document.getElementById('signupStepOtp').classList.add('hidden');
@@ -1470,36 +1504,27 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     const errEl = document.getElementById('signupOtpError');
     errEl.classList.add('hidden');
     const submitBtn = e.target.querySelector('button[type=submit]');
-    if (document.getElementById('signupOtpInput').value.trim() !== pendingSignupOtp) {
-      return showError(errEl, "Code incorrect, veuillez réessayer.");
-    }
 
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-    const password = document.getElementById('signupPassword').value;
 
     setBusy(submitBtn, true, 'Vérifier et créer mon compte');
-    const { data, error } = await sb.rpc('client_signup', {
-      p_name: name, p_email: email,
-      p_phone: document.getElementById('signupPhone').value.trim(),
-      p_address: document.getElementById('signupAddress').value.trim(),
-      p_password: password
+    const res = await callAuthFn({
+      action: 'signup', email, name,
+      phone: document.getElementById('signupPhone').value.trim(),
+      address: document.getElementById('signupAddress').value.trim(),
+      password: document.getElementById('signupPassword').value,
+      code: document.getElementById('signupOtpInput').value.trim()
     });
     setBusy(submitBtn, false, 'Vérifier et créer mon compte');
 
-    if (error) {
-      const msg = (error.message || '').includes('EMAIL_TAKEN')
-        ? "Un compte existe déjà avec cet e-mail. Connectez-vous plutôt."
-        : "Le compte n'a pas pu être créé : " + error.message;
-      return showError(errEl, msg);
-    }
-    const created = data && data[0];
+    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
+    const created = res.data && res.data.profile;
     if (!created) return showError(errEl, "Le compte n'a pas pu être créé.");
 
     safeWrite(CLIENT_SESSION_KEY, { id: created.id, email: created.email });
     window.dispatchEvent(new Event('jps-login'));
     document.getElementById('welcomeName').textContent = name.split(' ')[0];
-    pendingSignupOtp = null;
     document.getElementById('signupStepOtp').classList.add('hidden');
     document.getElementById('signupStepWelcome').classList.remove('hidden');
     document.getElementById('signupLoginLink').classList.add('hidden');
@@ -1551,7 +1576,6 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   });
   document.getElementById('forgotBackToLogin').addEventListener('click', resetLoginFlow);
 
-  let pendingResetOtp = null;
   let pendingResetEmail = null;
 
   document.getElementById('forgotEmailForm').addEventListener('submit', async (e) => {
@@ -1563,15 +1587,14 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
 
     setBusy(submitBtn, true, 'Envoyer le code');
-    const { data: acct } = await sb.from('clients').select('id').eq('email', email).maybeSingle();
+    const res = await callAuthFn({ action: 'send_otp', purpose: 'reset', email });
     setBusy(submitBtn, false, 'Envoyer le code');
 
-    if (!acct) return showError(errEl, "Aucun compte avec cet e-mail.");
+    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
 
     pendingResetEmail = email;
-    pendingResetOtp = makeOtp();
     document.getElementById('forgotResetEmail').textContent = email;
-    document.getElementById('forgotOtpDemo').textContent = 'Code de démonstration : ' + pendingResetOtp;
+    document.getElementById('forgotOtpDemo').textContent = '';
     document.getElementById('forgotResetError').classList.add('hidden');
     document.getElementById('forgotOtpInput').value = '';
     document.getElementById('forgotNewPassword').value = '';
@@ -1586,16 +1609,15 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     errEl.classList.add('hidden');
     const submitBtn = e.target.querySelector('button[type=submit]');
 
-    const code = document.getElementById('forgotOtpInput').value.trim();
-    if (code !== pendingResetOtp) return showError(errEl, "Code incorrect, veuillez réessayer.");
-
-    const newPassword = document.getElementById('forgotNewPassword').value;
-
     setBusy(submitBtn, true, 'Changer le mot de passe');
-    const { data: ok } = await sb.rpc('client_reset_password', { p_email: pendingResetEmail, p_new_password: newPassword });
+    const res = await callAuthFn({
+      action: 'reset_password', email: pendingResetEmail,
+      code: document.getElementById('forgotOtpInput').value.trim(),
+      new_password: document.getElementById('forgotNewPassword').value
+    });
     setBusy(submitBtn, false, 'Changer le mot de passe');
 
-    if (!ok) return showError(errEl, "Une erreur est survenue, veuillez réessayer.");
+    if (!res.ok) return showError(errEl, authErrorMessage(res.data && res.data.error));
 
     resetLoginFlow();
     document.getElementById('loginEmail').value = pendingResetEmail;

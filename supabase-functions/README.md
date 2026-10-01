@@ -77,3 +77,18 @@ subscribed gets the daily greeting at the scheduled time.
 The website already asks clients for notification permission from their
 dashboard ("Activer les notifications") and stores their subscription in
 the `push_subscriptions` table — nothing else to do for that part.
+
+
+## 2. E-mails (Brevo): OTP, password reset, shipment alerts
+Sender: `contact@jpslogistics.me` (name "JP's Logistics & More LLC"). The sender
+address/domain must be verified in Brevo (Senders, Domains & dedicated IPs).
+
+1. Secrets (Edge Functions > Secrets): `BREVO_API_KEY` = your Brevo API key.
+   **Never put this key in the website, the repo or a chat.**
+2. Deploy the `client-auth` Edge Function (`client-auth/index.ts`). It sends the
+   OTP e-mails and performs signup / password reset only after the code is verified.
+3. Re-deploy `send-notifications` (it now also e-mails clients on new shipments
+   and status changes, using the same `BREVO_API_KEY`).
+4. Run section 10 of `jps-logistics-supabase-schema.sql` in the SQL Editor
+   (`email_otps` table, one-account-per-phone check, and revoking direct access
+   to the signup/reset RPCs from the browser).
