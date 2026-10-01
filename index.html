@@ -1044,6 +1044,17 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
             </select>
           </div>
         </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[13px] font-semibold text-ink mb-1.5" for="shipPricePerLb">Prix par lb (USD)</label>
+            <input type="number" step="0.01" min="0" id="shipPricePerLb" class="w-full px-4 py-2.5 rounded-xl border-2 border-token focus:border-navy-mid outline-none text-[14.5px]" placeholder="4.50">
+          </div>
+          <div>
+            <label class="block text-[13px] font-semibold text-ink mb-1.5" for="shipFee">Frais de logistique (USD)</label>
+            <input type="number" step="0.01" min="0" id="shipFee" class="w-full px-4 py-2.5 rounded-xl border-2 border-token focus:border-navy-mid outline-none text-[14.5px]" placeholder="5.00">
+          </div>
+        </div>
+        <p id="shipTotalPreview" class="text-[13px] font-semibold text-navy-mid"></p>
         <div class="flex gap-3 mt-1">
           <button type="submit" class="flex-1 px-5 py-3 rounded-full bg-flare hover:bg-flare-hot text-white font-semibold text-[14px] transition-colors">Ajouter le colis</button>
           <button type="button" id="cancelShipmentBtn" class="px-5 py-3 rounded-full border-2 border-token text-ink font-semibold text-[14px]">Annuler</button>
@@ -1201,7 +1212,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     submitBtn.disabled = true;
     result.innerHTML = `<p class="text-white/70 text-[15px]">Recherche en cours…</p>`;
     const { data: rows, error } = await sb.from('shipments')
-      .select('tracking_number, type, description, weight, status, created_at, updated_at')
+      .select('tracking_number, type, description, weight, price_per_lb, logistics_fee, status, created_at, updated_at')
       .ilike('tracking_number', id.replace(/[\\%_]/g, '\\$&'))
       .limit(1);
     submitBtn.disabled = false;
@@ -1231,6 +1242,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     ].filter(d => d[1]).map(d => `
       <div><p class="text-white/45 text-[11.5px] uppercase tracking-wide">${d[0]}</p><p class="text-white/90 text-[14px] font-medium">${escHtml(d[1])}</p></div>
     `).join('');
+    const priceHtml = priceBreakdownHtml(ship, true);
     const pct = (entry.current / (steps.length - 1)) * 100;
     result.innerHTML = `
       <div class="flex items-center justify-between mb-6">
@@ -1256,6 +1268,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       </div>
 
       ${details ? `<div class="mt-7 pt-5 border-t border-dashed border-white/20 grid grid-cols-2 md:grid-cols-4 gap-4">${details}</div>` : ''}
+      <div class="mt-4">${priceHtml}</div>
     `;
   });
 
@@ -1265,6 +1278,21 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
   }
   function makeOtp(){
     return String(Math.floor(100000 + Math.random() * 900000));
+  }
+  const parseLbs = (w) => { const n = parseFloat(String(w == null ? '' : w).replace(',', '.')); return isNaN(n) ? 0 : n; };
+  const fmtUSD = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Returns null while the rate hasn't been set by staff yet.
+  function shipmentTotal(s){
+    if (s.price_per_lb == null || s.price_per_lb === '') return null;
+    return parseLbs(s.weight) * Number(s.price_per_lb) + Number(s.logistics_fee || 0);
+  }
+  function priceBreakdownHtml(s, light){
+    const total = shipmentTotal(s);
+    const muted = light ? 'text-white/50' : 'text-soft';
+    const strong = light ? 'text-white' : 'text-ink';
+    if (total === null) return `<p class="mt-2.5 text-[12.5px] ${muted}">Montant : à confirmer</p>`;
+    return `<p class="mt-2.5 text-[12.5px] ${muted}">${parseLbs(s.weight)} lbs × ${fmtUSD(s.price_per_lb)} + frais de logistique ${fmtUSD(s.logistics_fee)}</p>
+      <p class="text-[15px] font-bold ${strong}">Total à payer : ${fmtUSD(total)}</p>`;
   }
   function fmtDate(d){
     return new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
@@ -1716,6 +1744,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
         <div class="mt-2 flex justify-between text-[11px] text-soft">
           <span>Miami</span><span>Douane</span><span>Haïti</span><span>Retrait</span>
         </div>
+        ${priceBreakdownHtml(s, false)}
         <p class="mt-2.5 text-[11.5px] text-soft">Mis à jour : ${fmtDate(s.updated_at)}</p>
       </div>`;
     }).join('');
@@ -1875,6 +1904,16 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     }, 250);
   });
 
+  function updateShipTotalPreview(){
+    const t = shipmentTotal({
+      weight: document.getElementById('shipWeight').value,
+      price_per_lb: document.getElementById('shipPricePerLb').value,
+      logistics_fee: document.getElementById('shipFee').value
+    });
+    document.getElementById('shipTotalPreview').textContent = t === null ? '' : 'Total : ' + fmtUSD(t);
+  }
+  ['shipWeight','shipPricePerLb','shipFee'].forEach(id => document.getElementById(id).addEventListener('input', updateShipTotalPreview));
+
   newShipmentForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const clientId = document.getElementById('shipClientId').value;
@@ -1886,6 +1925,8 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       type: document.getElementById('shipType').value,
       description: document.getElementById('shipDescription').value.trim(),
       weight: document.getElementById('shipWeight').value.trim(),
+      price_per_lb: document.getElementById('shipPricePerLb').value === '' ? null : Number(document.getElementById('shipPricePerLb').value),
+      logistics_fee: Number(document.getElementById('shipFee').value || 0),
       status: Number(document.getElementById('shipStatus').value)
     });
 
@@ -1925,7 +1966,31 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
             <option value="2" ${s.status==2?'selected':''}>Arrivé en Haïti</option>
             <option value="3" ${s.status==3?'selected':''}>Prêt pour retrait</option>
           </select>
+          <div class="w-full pt-3 mt-1 border-t border-token grid grid-cols-2 sm:grid-cols-4 gap-2 items-end" data-price-row="${s.id}">
+            <label class="text-[11.5px] text-soft">Poids (lbs)<input type="text" data-f="weight" value="${(s.weight || '').toString().replace(/"/g, '&quot;')}" class="mt-1 w-full px-3 py-2 rounded-lg border-2 border-token text-[13px] text-ink"></label>
+            <label class="text-[11.5px] text-soft">Prix / lb (USD)<input type="number" step="0.01" min="0" data-f="price_per_lb" value="${s.price_per_lb ?? ''}" class="mt-1 w-full px-3 py-2 rounded-lg border-2 border-token text-[13px] text-ink"></label>
+            <label class="text-[11.5px] text-soft">Frais logistique (USD)<input type="number" step="0.01" min="0" data-f="logistics_fee" value="${s.logistics_fee ?? 0}" class="mt-1 w-full px-3 py-2 rounded-lg border-2 border-token text-[13px] text-ink"></label>
+            <button type="button" data-save-price="${s.id}" class="px-3 py-2 rounded-lg bg-navy-mid text-white text-[13px] font-semibold">Enregistrer</button>
+            <p class="col-span-2 sm:col-span-4 text-[13px] font-semibold text-navy-mid">${shipmentTotal(s) === null ? 'Montant : à confirmer' : 'Total : ' + fmtUSD(shipmentTotal(s))}</p>
+          </div>
         </div>`).join('');
+
+      document.querySelectorAll('[data-save-price]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const row = document.querySelector('[data-price-row="' + btn.dataset.savePrice + '"]');
+          const val = (f) => row.querySelector('[data-f="' + f + '"]').value;
+          btn.disabled = true;
+          const { error } = await sb.from('shipments').update({
+            weight: val('weight').trim(),
+            price_per_lb: val('price_per_lb') === '' ? null : Number(val('price_per_lb')),
+            logistics_fee: Number(val('logistics_fee') || 0),
+            updated_at: new Date().toISOString()
+          }).eq('id', btn.dataset.savePrice);
+          btn.disabled = false;
+          if (error) { btn.textContent = 'Erreur'; return; }
+          renderAdmin();
+        });
+      });
 
       document.querySelectorAll('.admin-status-select').forEach(sel => {
         sel.addEventListener('change', async () => {
