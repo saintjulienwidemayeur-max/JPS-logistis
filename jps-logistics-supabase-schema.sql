@@ -376,3 +376,23 @@ grant  execute on function public.phone_in_use(text)                          to
 
 -- 11) Preferred language of each client (fr / en / es): used for e-mails and push
 alter table public.clients add column if not exists lang text not null default 'fr';
+
+-- 12) delete_shipment: staff-only (owner / agent), checked with the staff e-mail + password
+create or replace function public.delete_shipment(p_email text, p_password text, p_id uuid)
+returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (
+    select 1 from public.admins a0
+    where a0.email = lower(p_email)
+      and a0.password_hash = public.jps_hash(p_password)
+      and a0.role in ('owner', 'agent')
+  ) then
+    raise exception 'Not authorized';
+  end if;
+  delete from public.shipments where id = p_id;
+  return true;
+end;
+$$;
+revoke execute on function public.delete_shipment(text, text, uuid) from public;
+grant  execute on function public.delete_shipment(text, text, uuid) to anon, authenticated;
