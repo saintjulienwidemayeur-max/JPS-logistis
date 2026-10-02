@@ -104,3 +104,8 @@ The site has a language switcher (top bar and client/admin pages). The chosen
 language is saved on the client (`clients.lang`, added by section 11 of the SQL
 file) so OTP, welcome, password and shipment e-mails and push notifications are
 sent in that language. Re-deploy `client-auth` and `send-notifications`.
+
+### Admin e-mails (one client or everyone)
+Deploy the `admin-mail` Edge Function (`admin-mail/index.ts`, Verify JWT OFF like the
+others). It uses the same `BREVO_API_KEY` secret. Only owner/agent staff accounts can
+use it (credentials are checked server-side).
