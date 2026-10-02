@@ -175,9 +175,9 @@ const STATUS_COPY: Record<LangCode, { title: string; text: string }[]> = {
   ],
 };
 const MAIL: Record<LangCode, Record<string, string>> = {
-  fr: { hello: "Bonjour {first},", newTitle: "Nouveau colis enregistré", newIntro: "Un nouveau colis vient d'être enregistré à votre nom.", tracking: "N° de suivi", description: "Description", type: "Type", weight: "Poids", status: "Statut", fee: "{w} lbs × {p} + frais de logistique {f}", total: "Total à payer : {t}", cta: "Suivre mon colis", subjectNew: "Nouveau colis {n}", air: "Air", sea: "Mer" },
-  en: { hello: "Hello {first},", newTitle: "New package registered", newIntro: "A new package has just been registered in your name.", tracking: "Tracking no.", description: "Description", type: "Type", weight: "Weight", status: "Status", fee: "{w} lbs × {p} + logistics fee {f}", total: "Total to pay: {t}", cta: "Track my package", subjectNew: "New package {n}", air: "Air", sea: "Sea" },
-  es: { hello: "Hola {first},", newTitle: "Nuevo paquete registrado", newIntro: "Se acaba de registrar un nuevo paquete a su nombre.", tracking: "N.º de seguimiento", description: "Descripción", type: "Tipo", weight: "Peso", status: "Estado", fee: "{w} lbs × {p} + gastos de logística {f}", total: "Total a pagar: {t}", cta: "Rastrear mi paquete", subjectNew: "Nuevo paquete {n}", air: "Aéreo", sea: "Marítimo" },
+  fr: { hello: "Bonjour {first},", newTitle: "Nouveau colis enregistré", newIntro: "Un nouveau colis vient d'être enregistré à votre nom.", tracking: "N° de suivi", description: "Description", type: "Type", weight: "Poids", status: "Statut", fee: "{w} lbs × {p} + frais de logistique {f}", total: "Total à payer : {t}", cta: "Suivre mon colis", subjectNew: "Nouveau colis {n}", air: "Air", sea: "Mer", pickupTitle: "Retrait de votre colis", pickupText: "Vous pouvez passer prendre votre colis à notre bureau de Pétion-Ville :", country: "Haïti", support: "Service client sur WhatsApp" },
+  en: { hello: "Hello {first},", newTitle: "New package registered", newIntro: "A new package has just been registered in your name.", tracking: "Tracking no.", description: "Description", type: "Type", weight: "Weight", status: "Status", fee: "{w} lbs × {p} + logistics fee {f}", total: "Total to pay: {t}", cta: "Track my package", subjectNew: "New package {n}", air: "Air", sea: "Sea", pickupTitle: "Pick up your package", pickupText: "You can come and pick up your package at our Pétion-Ville office:", country: "Haiti", support: "Customer service on WhatsApp" },
+  es: { hello: "Hola {first},", newTitle: "Nuevo paquete registrado", newIntro: "Se acaba de registrar un nuevo paquete a su nombre.", tracking: "N.º de seguimiento", description: "Descripción", type: "Tipo", weight: "Peso", status: "Estado", fee: "{w} lbs × {p} + gastos de logística {f}", total: "Total a pagar: {t}", cta: "Rastrear mi paquete", subjectNew: "Nuevo paquete {n}", air: "Aéreo", sea: "Marítimo", pickupTitle: "Retiro de su paquete", pickupText: "Puede pasar a retirar su paquete en nuestra oficina de Pétion-Ville:", country: "Haití", support: "Servicio al cliente por WhatsApp" },
 };
 const fill = (text: string, vars: Record<string, string | number>) =>
   text.replace(/\{(\w+)\}/g, (_m, k) => String(vars[k] ?? ""));
@@ -229,6 +229,15 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
         </td></tr></table>`;
     }
 
+    const supportHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border:1px solid #E6EAF4;border-radius:14px;"><tr><td style="padding:16px 18px;font-family:${FONT};">
+          <div style="font-size:12px;color:#6B7490;text-transform:uppercase;letter-spacing:1px;">&#128205; ${m.pickupTitle}</div>
+          <div style="font-size:14px;color:#1B2540;margin-top:6px;">${m.pickupText}</div>
+          <div style="font-size:15px;font-weight:bold;color:#0D2B80;margin-top:6px;line-height:1.5;">JP's Logistics &amp; More LLC<br>11, Rue Rogé, Pétion-Ville, ${m.country}<br>+509 3702-1722</div>
+        </td></tr></table>
+        <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 4px;"><tr><td style="background:#25D366;border-radius:999px;">
+          <a href="https://wa.me/17864248025" style="display:block;padding:10px 22px 10px 14px;text-decoration:none;color:#ffffff;font-weight:bold;font-size:14px;font-family:${FONT};"><img src="${SITE_URL}/whatsapp.png" width="24" height="24" alt="WhatsApp" style="vertical-align:middle;border:0;margin-right:8px;"><span style="vertical-align:middle;">${m.support}</span></a>
+        </td></tr></table>`;
+
     const title = isNew ? m.newTitle : copy.title;
     const intro = isNew ? `${m.newIntro} ${copy.text}` : copy.text;
     const html = layout(
@@ -237,7 +246,8 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
        <p style="margin:0;">${intro}</p>
        ${progressBar(status, lang)}
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${rows}</table>
-       ${priceHtml}`,
+       ${priceHtml}
+       ${supportHtml}`,
       { label: m.cta, url: `${SITE_URL}/#suivi` },
       `${record.tracking_number} : ${label}`,
       lang,
