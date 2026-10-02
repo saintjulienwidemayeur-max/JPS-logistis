@@ -377,32 +377,32 @@ window.render=function(t){
     [0,1,2].forEach(i=>{const a=3.0+i*.14;T('chips3'+i,{s:pop(lt,a),o:P(lt,a,.08)*(1-P(lt,4.05,.2))})});
   }
   // ---- S4 tracking simulation ----
-  if(cur===4){const lt=t-CUT[3];
+  if(cur===4){const lt=t-CUT[4];
     line('h41',lt,.05,5.6);line('h42',lt,.18,5.62);
     const pp=eOut5(P(lt,.05,.7));T('tPhone',{x:(1-pp)*-700,r:(1-pp)*-12+Math.sin(lt*1.2)*.8,y:Math.sin(lt*1.5)*6});
     // tap on "Suivre mon colis" then result scan
     const rp=P(lt,.62,.4);T('tRip',{x:233-40,y:262-40,s:.4+rp*1.6,o:rp>0?(1-rp):0});
     const sc=P(lt,.7,.6);T('tScan',{y:lerp(300,900,sc),o:sc>0&&sc<1?1:0});
     let stage=-1;ST.forEach((s,i)=>{if(t>=s)stage=i});
-    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[3];const o=i===0?1:eOut(P(lt,a-.05,.3));$('ts'+i).style.opacity=o});
+    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[4];const o=i===0?1:eOut(P(lt,a-.05,.3));$('ts'+i).style.opacity=o});
     // timeline nodes
-    TL.forEach((s,i)=>{const a=ST[i]-CUT[3];const on=lt>=a;
+    TL.forEach((s,i)=>{const a=ST[i]-CUT[4];const on=lt>=a;
       $('tc'+i).style.background=on?s[3]:'#C9D2E3';
       T('tc'+i,{s:on?eEl(P(lt,a,.8))*.25+.75+(i===stage?.04*Math.sin(lt*6):0):.75});
       const k=on?((lt-a)%1.1)/1.1:0;T('tr'+i,{s:1+k*.6,o:on&&i===stage?(1-k):0});
       T('tn'+i,{x:(1-eOut5(P(lt,.25+i*.1,.6)))*600,o:P(lt,.25+i*.1,.1)})});
     const fillTo=stage<0?0:stage/3;const prevF=stage<=0?0:(stage-1)/3;
-    const fk=stage<0?0:eIO(P(lt,ST[stage]-CUT[3],.6));T('tlFill',{sy:Math.max(.001,lerp(prevF,fillTo,fk)),sx:1});
+    const fk=stage<0?0:eIO(P(lt,ST[stage]-CUT[4],.6));T('tlFill',{sy:Math.max(.001,lerp(prevF,fillTo,fk)),sx:1});
     // route bar
     T('route',{y:(1-eOut5(P(lt,.4,.6)))*400,o:P(lt,.4,.1)});
     const rf=Math.max(.001,lerp(prevF,fillTo,fk));T('rFill',{sx:rf,sy:1});
     T('rPlane',{x:40+rf*880-30,y:Math.sin(lt*6)*3,r:Math.sin(lt*3)*4});
     // push notification for each stage
-    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[3]+.12;const p=eBack(P(lt,a,.5));const out=eIn(P(lt,a+1.0,.3));
+    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[4]+.12;const p=eBack(P(lt,a,.5));const out=eIn(P(lt,a+1.0,.3));
       T('tnf'+i,{y:lerp(300,520,p)-out*400,s:.92+.08*p,o:P(lt,a,.08)*(1-out)})});
   }
   // ---- S5 e-mails ----
-  if(cur===5){const lt=t-CUT[4];
+  if(cur===5){const lt=t-CUT[5];
     line('h51',lt,.05,3.6);line('h52',lt,.18,3.62);
     const ip=eOut5(P(lt,.1,.6));T('inbox',{y:(1-ip)*-500,o:P(lt,.1,.1)});
     let n=0;[0,1,2,3].forEach(k=>{const a=.45+(3-k)*.22;const p=eBack(P(lt,a,.5));if(lt>=a)n++;
@@ -414,7 +414,7 @@ window.render=function(t){
     T('mailR',{x:(1-ml)*500,r:9*ml,s:.9,o:P(lt,1.7,.1)*.95});
   }
   // ---- S6 client space ----
-  if(cur===7){const lt=t-CUT[5];
+  if(cur===7){const lt=t-CUT[7];
     line('h61',lt,.05,3.6);line('h62',lt,.18,3.62);
     const lp=eOut5(P(lt,.1,.7));T('aLap',{s:.7+.3*lp,rx:(1-lp)*-30,y:(1-lp)*120+Math.sin(lt*1.3)*5,o:P(lt,.1,.1)});
     $('admImg').style.transform=`translateY(${-eIO(P(lt,1.4,1.6))*0}px)`;
@@ -440,7 +440,7 @@ window.render=function(t){
     $('runner').style.filter='drop-shadow(0 26px 18px rgba(11,27,63,.25))';
   }
   // ---- S8 outro ----
-  if(cur===10){const lt=t-CUT[7];
+  if(cur===10){const lt=t-CUT[10];
     burst.forEach(b=>{const p=eOut5(P(lt,.2+b.dl,1.4));T(b.d,{x:540+Math.cos(b.a)*b.R*p-b.s/2,y:430+Math.sin(b.a)*b.R*p-b.s/2,o:P(lt,.2,.05)*(1-p)*.8,s:1-p*.5})});
     T('wMark',{s:eEl(P(lt,.1,1.1)),r:(1-eOut(P(lt,.1,.9)))*90,o:P(lt,.1,.05),y:Math.sin(lt*1.6)*6});
     const wp=eExpo(P(lt,.5,.55));$('wWord').style.clipPath=`inset(0 ${(1-wp)*100}% 0 0)`;T('wWord',{x:(1-wp)*-40});
