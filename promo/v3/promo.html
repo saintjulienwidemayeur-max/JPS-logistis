@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>Freda Tech × JP's Logistics — vitrine 30s</title>
+<link rel="stylesheet" href="../v2/fonts/fonts.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#F3F6FC}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:'Inter',sans-serif;color:#0B1B3F;background:#F3F6FC}
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.scene{position:absolute;inset:0;visibility:hidden;perspective:2400px}
+.h{font-weight:800;letter-spacing:-.035em;line-height:1}
+.blue{color:#034BAA}
+.mask{overflow:hidden;position:absolute;left:0;width:1080px;text-align:center;padding-bottom:12px}
+.mask span{display:block;white-space:nowrap;will-change:transform}
+.pill{display:flex;align-items:center;gap:18px;border-radius:999px;font-weight:700}
+.tile{display:flex;align-items:center;justify-content:center;flex:none}
+.ic{fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.shadow{box-shadow:0 40px 80px rgba(11,27,63,.18),0 10px 24px rgba(11,27,63,.10)}
+.dev{position:absolute;background:#0e1424}
+.scr{position:relative;overflow:hidden;background:#fff}
+.scr img{display:block;will-change:transform}
+.glare{position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 38%);pointer-events:none}
+.center{transform-origin:50% 50%}
+.notif{position:absolute;display:flex;gap:18px;align-items:flex-start;border-radius:34px;padding:22px 24px;background:rgba(255,255,255,.94);box-shadow:0 24px 50px rgba(0,0,0,.28);color:#0B1B3F}
+.notif .ap{width:74px;height:74px;border-radius:20px;background:#0D2B80;display:flex;align-items:center;justify-content:center;flex:none}
+.notif .t1{font-size:22px;font-weight:700;color:#5B6479;display:flex;justify-content:space-between;white-space:nowrap;gap:10px}
+.notif .t2{font-size:26px;font-weight:600;line-height:1.25;margin-top:4px}
+.stack{position:absolute;inset:0}
+.stack img{position:absolute;left:0;top:0}
+</style></head>
+<body>
+<div id="stage">
+  <!-- ambient -->
+  <div class="abs" id="au1" style="width:1300px;height:1300px;border-radius:50%;background:radial-gradient(closest-side,rgba(3,75,170,.30),rgba(3,75,170,0))"></div>
+  <div class="abs" id="au2" style="width:1100px;height:1100px;border-radius:50%;background:radial-gradient(closest-side,rgba(126,200,255,.55),rgba(126,200,255,0))"></div>
+  <div class="abs" id="au3" style="width:1000px;height:1000px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,138,61,.28),rgba(255,138,61,0))"></div>
+  <div class="abs" id="dotsBg" style="left:-60px;top:-60px;width:1200px;height:2040px;background-image:radial-gradient(rgba(3,75,170,.22) 2px,transparent 2.5px);background-size:36px 36px;-webkit-mask-image:radial-gradient(ellipse 70% 55% at 50% 50%,#000 0%,transparent 75%)"></div>
+  <div id="blobs"></div>
+
+  <!-- header -->
+  <div class="abs" id="hdr" style="left:56px;top:62px;display:flex;align-items:center;gap:16px;opacity:0">
+    <img src="../v2/img/freda-mark.png" style="width:64px">
+    <div><img src="../v2/img/freda-word.png" style="width:230px;display:block"><img src="../v2/img/freda-group.png" style="width:97px;display:block;margin:5px 0 0 134px"></div>
+  </div>
+  <div class="abs pill" id="hdrR" style="left:770px;top:70px;height:58px;padding:0 24px;background:#fff;font-size:22px;letter-spacing:.14em;color:#034BAA;opacity:0"><span style="width:12px;height:12px;border-radius:50%;background:#FF5500"></span>ÉTUDE DE CAS</div>
+
+  <!-- ===== S1 HOOK : lockscreen push notifications ===== -->
+  <div class="scene" id="s1">
+    <div class="mask" style="top:150px;height:130px"><span id="h11" class="h" style="font-size:104px">Vos clients savent</span></div>
+    <div class="mask" style="top:258px;height:130px"><span id="h12" class="h blue" style="font-size:104px">où est leur colis.</span></div>
+    <div class="abs" id="lock" style="left:250px;top:470px;width:580px;height:1180px;transform-origin:50% 45%">
+      <div class="dev shadow" style="left:0;top:0;width:580px;height:1180px;border-radius:90px;padding:18px">
+        <div class="scr" style="width:544px;height:1144px;border-radius:74px;background:radial-gradient(circle at 20% 15%,#2F6BFF 0%,transparent 45%),radial-gradient(circle at 85% 70%,#FF5500 0%,transparent 45%),linear-gradient(160deg,#0D2B80,#061234 70%)">
+          <div style="position:absolute;left:212px;top:22px;width:120px;height:36px;border-radius:18px;background:#000"></div>
+          <div style="position:absolute;top:120px;width:100%;text-align:center;color:#fff;font-size:30px;font-weight:600;opacity:.85">jeudi 2 octobre</div>
+          <div style="position:absolute;top:150px;width:100%;text-align:center;color:#fff;font-size:150px;font-weight:700;letter-spacing:-.03em">9:41</div>
+          <div id="nstack"></div>
+        </div>
+      </div>
+    </div>
+    <div class="abs pill" id="hookTag" style="left:250px;top:1700px;width:580px;height:90px;justify-content:center;background:#0B1B3F;color:#fff;font-size:30px">
+      <svg width="34" height="34" viewBox="0 0 24 24" class="ic"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>Notifications en temps réel</div>
+  </div>
+
+  <!-- ===== S2 FREDA TECH INTRO ===== -->
+  <div class="scene" id="s2">
+    <div id="conv"></div>
+    <img class="abs center" id="fMark" src="../v2/img/freda-mark.png" style="left:290px;top:420px;width:500px">
+    <img class="abs" id="fWord" src="../v2/img/freda-word.png" style="left:115px;top:1010px;width:850px">
+    <img class="abs" id="fGroup" src="../v2/img/freda-group.png" style="left:609px;top:1127px;width:359px">
+    <div class="abs" id="pres" style="top:1270px;width:1080px;text-align:center;font-size:38px;font-weight:600;letter-spacing:.5em;color:#FF5500">PRÉSENTE</div>
+    <div class="abs pill shadow" id="forC" style="left:240px;top:1370px;width:600px;height:120px;background:#fff;justify-content:center;font-size:30px;color:#5B6479">
+      <img src="../v2/img/jps-logo.png" style="width:150px">un projet livré</div>
+  </div>
+
+  <!-- ===== S3 SITE ON PC ===== -->
+  <div class="scene" id="s3">
+    <div class="mask" style="top:215px;height:120px"><span id="h31" class="h" style="font-size:96px">Un site sur mesure,</span></div>
+    <div class="mask" style="top:315px;height:120px"><span id="h32" class="h blue" style="font-size:96px">moderne &amp; rapide.</span></div>
+    <div class="abs" id="mon" style="left:60px;top:560px;width:960px;height:740px;transform-origin:50% 40%">
+      <div class="dev shadow" style="left:0;top:0;width:960px;height:610px;border-radius:30px;padding:20px">
+        <div class="scr" style="width:920px;height:570px;border-radius:10px"><img id="monImg" src="../v2/img/desk-full.png" style="width:920px"><div class="glare"></div>
+          <div class="abs" id="ripple" style="width:90px;height:90px;border-radius:50%;border:5px solid #FF5500;opacity:0"></div></div>
+      </div>
+      <div style="position:absolute;left:400px;top:610px;width:160px;height:96px;background:linear-gradient(90deg,#aeb8cc,#dfe5f0 50%,#aeb8cc);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%)"></div>
+      <div style="position:absolute;left:300px;top:700px;width:360px;height:24px;border-radius:12px;background:linear-gradient(#e2e8f2,#b4bfd3);box-shadow:0 20px 40px rgba(11,27,63,.2)"></div>
+    </div>
+    <img class="abs center" id="popPlane" src="../v2/img/site0.png" style="width:560px">
+    <img class="abs center" id="popShip" src="../v2/img/site1.png" style="width:340px">
+    <svg class="abs" id="cursor" width="56" height="70" viewBox="0 0 24 30"><path d="M2 2 L2 24 L8 18.5 L12.5 28 L16 26.5 L11.6 17.2 L19.5 17.2 Z" fill="#0B1B3F" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <div id="chips3"></div>
+  </div>
+
+  <!-- ===== S4 TRACKING SIMULATION ===== -->
+  <div class="scene" id="s4">
+    <div class="mask" style="top:215px;height:120px"><span id="h41" class="h" style="font-size:100px">Suivi de colis</span></div>
+    <div class="mask" style="top:318px;height:120px"><span id="h42" class="h blue" style="font-size:100px">en temps réel.</span></div>
+    <div class="abs" id="tPhone" style="left:60px;top:490px;width:470px;height:990px">
+      <div class="dev shadow" style="left:0;top:0;width:470px;height:990px;border-radius:70px;padding:16px">
+        <div class="scr" style="width:438px;height:958px;border-radius:56px"><div class="stack" id="tStack"></div><div class="glare"></div>
+          <div class="abs" id="tRip" style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.6);opacity:0"></div>
+          <div class="abs" id="tScan" style="left:0;top:0;width:438px;height:160px;background:linear-gradient(rgba(255,255,255,0),rgba(126,200,255,.45),rgba(255,255,255,0));opacity:0"></div>
+          <div style="position:absolute;left:169px;top:14px;width:100px;height:30px;border-radius:15px;background:#0e1424"></div></div>
+      </div>
+    </div>
+    <div id="tNotifs"></div>
+    <div id="tl"></div>
+    <div class="abs shadow" id="route" style="left:60px;top:1560px;width:960px;height:150px;border-radius:40px;background:#fff;padding:0 40px">
+      <div style="position:absolute;left:40px;top:38px;font-size:24px;font-weight:800;letter-spacing:.1em;color:#034BAA">MIAMI</div>
+      <div style="position:absolute;right:40px;top:38px;font-size:24px;font-weight:800;letter-spacing:.1em;color:#FF5500">PÉTION-VILLE</div>
+      <div style="position:absolute;left:40px;top:96px;width:880px;height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,#DDE3F0 0 14px,transparent 14px 24px)"></div>
+      <div id="rFill" style="position:absolute;left:40px;top:96px;width:880px;height:8px;border-radius:4px;background:linear-gradient(90deg,#034BAA,#FF5500);transform-origin:0 50%"></div>
+      <div id="rPlane" style="position:absolute;left:0;top:70px;width:60px;height:60px;border-radius:50%;background:#FF5500;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(255,85,0,.45)">
+        <svg width="34" height="34" viewBox="0 0 100 100" fill="#fff"><path d="M4 50 Q4 44 14 44 L80 44 Q98 46 98 50 Q98 54 80 56 L14 56 Q4 56 4 50Z"/><path d="M44 46 L30 10 L42 10 L68 46Z M44 54 L30 90 L42 90 L68 54Z"/><path d="M10 46 L2 30 L12 30 L24 46Z M10 54 L2 70 L12 70 L24 54Z"/></svg></div>
+    </div>
+  </div>
+
+  <!-- ===== S5 EMAILS ===== -->
+  <div class="scene" id="s5">
+    <div class="mask" style="top:215px;height:120px"><span id="h51" class="h" style="font-size:100px">Un e-mail</span></div>
+    <div class="mask" style="top:318px;height:120px"><span id="h52" class="h blue" style="font-size:100px">à chaque étape.</span></div>
+    <div class="abs shadow" id="inbox" style="left:60px;top:470px;width:960px;height:500px;border-radius:40px;background:#fff;overflow:hidden">
+      <div style="height:86px;background:#0D2B80;color:#fff;display:flex;align-items:center;gap:16px;padding:0 32px;font-size:30px;font-weight:700">
+        <svg width="36" height="36" viewBox="0 0 24 24" class="ic"><rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>Boîte de réception<span id="badge" style="margin-left:auto;background:#FF5500;border-radius:999px;font-size:24px;padding:4px 16px">0</span></div>
+      <div id="rows"></div>
+    </div>
+    <img class="abs shadow center" id="mailL" src="img/mail0.png" style="left:70px;top:1050px;width:400px;border-radius:24px">
+    <img class="abs shadow center" id="mailR" src="img/mail3.png" style="left:610px;top:1050px;width:400px;border-radius:24px">
+    <div class="abs shadow" id="mailC" style="left:250px;top:1000px;width:580px;height:760px;border-radius:30px;overflow:hidden;background:#EEF1F8">
+      <img id="mailImg" src="img/mail2.png" style="width:580px;display:block"></div>
+  </div>
+
+  <!-- ===== S6 CLIENT SPACE + ADMIN ===== -->
+  <div class="scene" id="s6">
+    <div class="mask" style="top:215px;height:120px"><span id="h61" class="h" style="font-size:100px">Espace client</span></div>
+    <div class="mask" style="top:318px;height:120px"><span id="h62" class="h blue" style="font-size:100px">&amp; tableau de bord.</span></div>
+    <div class="abs" id="aLap" style="left:30px;top:560px;width:680px;height:470px;transform-origin:50% 100%">
+      <div class="dev shadow" style="left:0;top:0;width:680px;height:440px;border-radius:22px 22px 6px 6px;padding:14px 14px 20px">
+        <div class="scr" style="width:652px;height:406px;border-radius:6px"><img id="admImg" src="img/admin-d.png" style="width:652px"><div class="glare"></div></div></div>
+      <div style="position:absolute;left:-50px;top:438px;width:780px;height:28px;border-radius:0 0 28px 28px;background:linear-gradient(#dfe5f0,#a9b4c9);box-shadow:0 26px 50px rgba(11,27,63,.25)"></div>
+    </div>
+    <div class="abs pill shadow" id="admTag" style="left:70px;top:1060px;height:70px;padding:0 24px;background:#0D2B80;color:#fff;font-size:26px">
+      <svg width="30" height="30" viewBox="0 0 24 24" class="ic"><rect x="3" y="3" width="7.5" height="9" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="5" rx="1.5"/><rect x="13.5" y="11" width="7.5" height="10" rx="1.5"/><rect x="3" y="15" width="7.5" height="6" rx="1.5"/></svg>Admin : colis, clients, équipe</div>
+    <div class="abs" id="cPhone" style="left:680px;top:500px;width:360px;height:760px">
+      <div class="dev shadow" style="left:0;top:0;width:360px;height:760px;border-radius:58px;padding:13px">
+        <div class="scr" style="width:334px;height:734px;border-radius:46px"><img id="dashImg" src="img/dash-m.png" style="width:334px"><img id="dashImg2" src="img/dash-m2.png" style="width:334px;position:absolute;left:0;top:0;opacity:0"><div class="glare"></div>
+          <div style="position:absolute;left:122px;top:10px;width:90px;height:26px;border-radius:13px;background:#0e1424"></div></div></div>
+    </div>
+    <div id="chips6"></div>
+  </div>
+
+  <!-- ===== S7 MULTI DEVICE ===== -->
+  <div class="scene" id="s7">
+    <div class="mask" style="top:215px;height:120px"><span id="h71" class="h" style="font-size:100px">Parfait sur</span></div>
+    <div class="mask" style="top:318px;height:120px"><span id="h72" class="h blue" style="font-size:100px">tous les écrans.</span></div>
+    <div class="abs" id="grp" style="left:0;top:0;width:1080px;height:1920px;transform-origin:540px 1000px">
+      <div class="abs" id="lap" style="left:150px;top:600px;width:780px;height:520px;transform-origin:50% 100%">
+        <div class="dev shadow" style="left:0;top:0;width:780px;height:490px;border-radius:24px 24px 6px 6px;padding:16px 16px 22px">
+          <div class="scr" style="width:748px;height:452px;border-radius:6px"><img id="lapImg" src="../v2/img/desk-full.png" style="width:748px"><div class="glare"></div></div></div>
+        <div style="position:absolute;left:-60px;top:488px;width:900px;height:30px;border-radius:0 0 30px 30px;background:linear-gradient(#dfe5f0,#a9b4c9);box-shadow:0 26px 50px rgba(11,27,63,.25)"></div>
+      </div>
+      <div class="abs" id="tab" style="left:40px;top:890px;width:360px;height:500px">
+        <div class="dev shadow" style="left:0;top:0;width:360px;height:500px;border-radius:38px;padding:16px">
+          <div class="scr" style="width:328px;height:468px;border-radius:22px"><img id="tabImg" src="../v2/img/tab-full.png" style="width:328px"><div class="glare"></div></div></div>
+      </div>
+      <div class="abs" id="pho" style="left:740px;top:810px;width:290px;height:600px">
+        <div class="dev shadow" style="left:0;top:0;width:290px;height:600px;border-radius:52px;padding:12px">
+          <div class="scr" style="width:266px;height:576px;border-radius:42px"><img id="phoImg" src="../v2/img/mob-full.png" style="width:266px"><div class="glare"></div></div></div>
+      </div>
+    </div>
+    <div id="ring7"></div>
+    <img class="abs center" id="runner" src="../v2/img/site2.png" style="width:280px">
+  </div>
+
+  <!-- ===== S8 OUTRO ===== -->
+  <div class="scene" id="s8">
+    <div class="abs" style="inset:0;width:1080px;height:1920px;background:radial-gradient(circle at 50% 30%,#1360D6 0%,#034BAA 45%,#022C6B 100%)"></div>
+    <div id="burst"></div>
+    <img class="abs center" id="wMark" src="../v2/img/freda-mark-white.png" style="left:370px;top:250px;width:340px">
+    <img class="abs" id="wWord" src="../v2/img/freda-word-white.png" style="left:200px;top:640px;width:680px">
+    <img class="abs" id="wGroup" src="../v2/img/freda-group-white.png" style="left:595px;top:734px;width:288px">
+    <div class="mask" style="top:850px;height:100px"><span id="h81" class="h" style="font-size:80px;color:#fff">Votre projet,</span></div>
+    <div class="mask" style="top:935px;height:100px"><span id="h82" class="h" style="font-size:80px;color:#9FD3FF">notre expertise.</span></div>
+    <div class="abs pill" id="ctaP" style="left:150px;top:1120px;width:780px;height:120px;background:#fff;color:#034BAA;padding:0 26px;font-size:46px;font-weight:800">
+      <div class="tile" style="width:78px;height:78px;border-radius:50%;background:#034BAA"><svg width="40" height="40" viewBox="0 0 24 24" class="ic"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/></svg></div>
+      <div><div style="font-size:22px;letter-spacing:.12em;color:#5B6479;font-weight:700">APPELEZ-NOUS</div>+1 (774) 458-5835</div></div>
+    <div class="abs pill" id="ctaW" style="left:150px;top:1270px;width:780px;height:120px;background:#25D366;color:#fff;padding:0 26px;font-size:46px;font-weight:800">
+      <div class="tile" style="width:78px;height:78px;border-radius:50%;background:#fff"><img src="../v2/img/whatsapp.png" style="width:52px"></div>
+      <div><div style="font-size:22px;letter-spacing:.12em;color:#E4FFEE;font-weight:700">WHATSAPP</div>+1 (774) 458-5835</div></div>
+    <div class="abs" id="foot" style="top:1470px;width:1080px;text-align:center;font-size:30px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.55">
+      <b style="color:#fff">Freda Tech</b> · une filiale de <b style="color:#fff">Freda Pay LLC</b><br><span style="font-size:26px;color:rgba(255,255,255,.65)">Sites web · Applications · Espaces clients</span></div>
+  </div>
+
+  <!-- transitions -->
+  <div class="abs" id="iris" style="left:540px;top:960px;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:#034BAA;transform:scale(0)"></div>
+  <div class="abs" id="flash" style="width:1080px;height:1920px;background:#fff;opacity:0"></div>
+  <div class="abs" id="wp0" style="top:-300px;width:1500px;height:2520px;background:#034BAA"></div>
+  <div class="abs" id="wp1" style="top:-300px;width:1500px;height:2520px;background:#FF5500"></div>
+  <div class="abs" id="wp2" style="top:-300px;width:1500px;height:2520px;background:#7EC8FF"></div>
+</div>
+
+<script>
+const W=1080,H=1920,DUR=30;
+const CUT=[0,3,5.5,9,15,19,23,26,DUR];
+const NS=8;
+const cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const P=(t,a,d)=>cl((t-a)/d);
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eOut=x=>1-Math.pow(1-x,3), eOut5=x=>1-Math.pow(1-x,5), eIn=x=>x*x*x;
+const eIO=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eExpo=x=>x>=1?1:1-Math.pow(2,-10*x);
+const eBack=x=>{const c1=1.9,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const eEl=x=>x<=0?0:x>=1?1:Math.pow(2,-10*x)*Math.sin((x*10-.75)*(2*Math.PI/3))+1;
+const $=id=>document.getElementById(id);
+function T(el,o){ if(typeof el==='string') el=$(el);
+  const {x=0,y=0,s=1,sx=s,sy=s,r=0,o:op=1,blur=0,ry=0,rx=0}=o;
+  el.style.transform=`translate3d(${x}px,${y}px,0) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${r}deg) scale(${sx},${sy})`;
+  el.style.opacity=op; el.style.filter=blur>0.05?`blur(${blur}px)`:''; }
+function C(el,cx,cy,o={}){ if(typeof el==='string') el=$(el); T(el,Object.assign({},o,{x:cx-el.offsetWidth/2,y:cy-el.offsetHeight/2})); }
+function line(id,t,a,exit){ const i=eExpo(P(t,a,.7)), e=exit!=null?eIn(P(t,exit,.32)):0;
+  $(id).style.transform=`translateY(${(1-i)*110-e*110}%) rotate(${(1-i)*4}deg)`; }
+const pop=(t,a,d=.5)=>Math.max(.001,eBack(P(t,a,d)));
+
+const IC={
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="2.6"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/>',
+ pal:'<path d="M12 3a9 9 0 1 0 0 18c1.4 0 1.9-1 1.4-2.1-.6-1.3.3-2.4 1.6-2.4H17a4 4 0 0 0 4-4c0-5-4-9.5-9-9.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/>',
+ bolt:'<path d="M13 2L4.5 13.5h6.5L10 22l8.5-11.5H12z"/>',
+ seo:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5M8 11.5l2 2 3.5-4"/>',
+ box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+ plane:'<path d="M2.5 13.5l7-1.5 5-8.5h2.5l-2 8.5 5-.8 1.5-2.2h1.8l-1 3.5 1 3.5h-1.8L20 13.8l-5-.8 2 8.5h-2.5l-5-8.5-7-1.5z"/>',
+ pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3.5 7l8.5 6 8.5-6"/>',
+ dash:'<rect x="3" y="3" width="7.5" height="9" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="5" rx="1.5"/><rect x="13.5" y="11" width="7.5" height="10" rx="1.5"/><rect x="3" y="15" width="7.5" height="6" rx="1.5"/>',
+ lock:'<rect x="4" y="10" width="16" height="11" rx="2.2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14.5v3"/>',
+ bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+ dollar:'<rect x="3" y="4" width="18" height="16" rx="2.2"/><path d="M7 9h10M7 13h6M15.5 15.5h2"/>',
+ mon:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+ tab:'<rect x="5" y="2" width="14" height="20" rx="2.2"/><path d="M11 18.5h2"/>',
+ mob:'<rect x="7" y="2" width="10" height="20" rx="2.2"/><path d="M11 18.5h2"/>',
+ lang:'<path d="M3 5h10M8 3v2M5 5c.8 3.5 3.5 6.3 7 7.5M11 5c-.8 3.5-3.5 6.3-7 7.5"/><path d="M13 21l4-9 4 9M14.5 18h5"/>'};
+const svg=(k,s=56)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" class="ic">${IC[k]}</svg>`;
+const appIcon=`<div class="ap"><img src="img/jps-logo-white.png" style="width:58px"></div>`;
+function notifHTML(id,body,time='maintenant'){return `<div class="notif" id="${id}">${appIcon}<div style="flex:1"><div class="t1"><span>JP's Logistics &amp; More</span><span style="font-weight:500">${time}</span></div><div class="t2">${body}</div></div></div>`}
+const PUSH=['reçu au dépôt de Miami','en transit / en douane','arrivé en Haïti','prêt pour retrait'];
+const pushTxt=i=>`Votre colis <b>JPS-2026-48213</b> est maintenant : ${PUSH[i]}.`;
+
+// ---------- dynamic DOM ----------
+let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const blobs=[];(function(){const c=$('blobs');for(let i=0;i<16;i++){const d=document.createElement('div');d.className='abs';
+  const s=24+rnd()*120;d.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:#034BAA`;c.appendChild(d);
+  blobs.push({d,s,x:rnd()*W,y:rnd()*H,vx:(rnd()-.5)*30,vy:-10-rnd()*40,a:.05+rnd()*.12,b:rnd()<.45?6+rnd()*10:0,ph:rnd()*6})}})();
+// hook notifications
+$('nstack').innerHTML=[0,1,2].map(i=>notifHTML('hn'+i,pushTxt(i),['il y a 2 j','hier','maintenant'][i])).join('');
+[0,1,2].forEach(i=>{const n=$('hn'+i);n.style.left='22px';n.style.width='500px';n.classList.add('abs')});
+const conv=[];(function(){const c=$('conv');for(let i=0;i<22;i++){const d=document.createElement('div');d.className='abs';
+  const s=18+rnd()*46;d.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:#034BAA`;c.appendChild(d);
+  const a=rnd()*Math.PI*2,R=520+rnd()*500;conv.push({d,s,x:540+Math.cos(a)*R,y:670+Math.sin(a)*R,dl:rnd()*.3})}})();
+function chipRow(cid,list,tops,lefts,widths,h=96,fs=30){const c=$(cid);list.forEach((p,i)=>{const d=document.createElement('div');d.className='abs pill shadow center';d.id=cid+i;
+  d.style.cssText+=`;left:${lefts[i]}px;top:${tops[i]}px;width:${widths[i]}px;height:${h}px;background:#fff;padding:0 14px;font-size:${fs}px`;
+  d.innerHTML=`<div class="tile" style="width:${h-28}px;height:${h-28}px;border-radius:50%;background:${p[2]}">${svg(p[0],(h-28)*.52)}</div>${p[1]}`;c.appendChild(d)})}
+chipRow('chips3',[['pal','Design sur mesure','#6C4CF5'],['bolt','Rapide & sécurisé','#FF5500'],['seo','SEO optimisé','#25B66B']],[1420,1420,1546],[40,460,380],[400,390,320]);
+chipRow('chips6',[['pin','Adresse Miami perso','#FF5500'],['dollar','Total à payer','#1E88E5'],['bell','Alertes push','#6C4CF5'],['lang','FR · EN · ES','#25B66B']],[1310,1310,1430,1430],[40,560,40,560],[480,480,480,480],100,32);
+chipRow('ring7',[['bell','Notifications','#6C4CF5'],['mail','E-mails auto','#1E88E5'],['phone','App installable','#FF5500']],[470,470,470],[40,385,710],[330,310,330],88,27);
+// tracking: stacked real screenshots + timeline + notifications
+$('tStack').innerHTML=[0,1,2,3].map(i=>`<img id="ts${i}" src="img/track-m${i}.png" style="width:438px">`).join('');
+const TL=[['box','Reçu à Miami','Dépôt · Miami, FL','#034BAA'],['plane','En transit','Fret & douane','#1E88E5'],['pin','Arrivé en Haïti','Pétion-Ville','#FF5500'],['check','Prêt pour retrait','11, Rue Rogé','#25B66B']];
+(function(){const c=$('tl');let h=`<div class="abs" style="left:640px;top:600px;width:8px;height:780px;border-radius:4px;background:#DDE3F0"></div><div class="abs" id="tlFill" style="left:640px;top:600px;width:8px;height:780px;border-radius:4px;background:linear-gradient(#034BAA,#FF5500,#25B66B);transform-origin:50% 0"></div>`;
+  TL.forEach((s,i)=>{h+=`<div class="abs" id="tn${i}" style="left:580px;top:${545+i*260}px;display:flex;align-items:center;gap:24px">
+   <div style="position:relative;width:128px;height:128px;flex:none"><div id="tr${i}" style="position:absolute;inset:0;border-radius:50%;border:5px solid ${s[3]};opacity:0"></div>
+   <div id="tc${i}" class="tile" style="position:absolute;inset:0;border-radius:50%;background:#C9D2E3">${svg(s[0],60)}</div></div>
+   <div><div style="font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.1;width:300px">${s[1]}</div><div style="font-size:24px;font-weight:600;color:#5B6479;margin-top:6px">${s[2]}</div></div></div>`});
+  c.innerHTML=h})();
+$('tNotifs').innerHTML=[0,1,2,3].map(i=>notifHTML('tnf'+i,pushTxt(i))).join('');
+[0,1,2,3].forEach(i=>{const n=$('tnf'+i);n.classList.add('abs');n.style.left='35px';n.style.width='520px'});
+const ST=[9.75,11.05,12.35,13.65];
+// inbox rows (real subjects from the e-mail function)
+const SUBJ=['Nouveau colis JPS-2026-48213','Votre colis est en route','Votre colis est arrivé en Haïti','Votre colis est prêt !'];
+$('rows').innerHTML=SUBJ.slice().reverse().map((s,k)=>`<div class="abs" id="row${k}" style="left:0;top:${86+k*103}px;width:960px;height:103px;border-bottom:2px solid #EEF1F8;display:flex;align-items:center;gap:22px;padding:0 30px">
+  <div class="tile" style="width:62px;height:62px;border-radius:50%;background:${['#25B66B','#FF5500','#1E88E5','#034BAA'][k]}">${svg('mail',32)}</div>
+  <div style="flex:1;min-width:0"><div style="font-size:23px;font-weight:700;color:#5B6479">JP's Logistics &amp; More LLC</div><div style="font-size:29px;font-weight:800;white-space:nowrap">${s}</div></div>
+  <div style="text-align:right"><div style="font-size:22px;color:#5B6479;font-weight:600">${['9:41','hier','29 sept.','26 sept.'][k]}</div><div id="dot${k}" style="width:16px;height:16px;border-radius:50%;background:#FF5500;margin:10px 0 0 auto"></div></div></div>`).join('');
+const burst=[];(function(){const c=$('burst');for(let i=0;i<26;i++){const d=document.createElement('div');d.className='abs';const s=10+rnd()*40;
+  d.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:#fff`;c.appendChild(d);
+  const a=rnd()*Math.PI*2;burst.push({d,s,a,R:300+rnd()*520,dl:rnd()*.2})}})();
+
+// ================= MASTER RENDER =================
+window.render=function(t){
+  let cur=0;for(let i=0;i<NS;i++)if(t>=CUT[i])cur=i;
+  for(let i=0;i<NS;i++)$('s'+(i+1)).style.visibility=i===cur?'visible':'hidden';
+  // ambient
+  T('au1',{x:-350+Math.sin(t*.35)*220,y:-250+Math.cos(t*.3)*200});
+  T('au2',{x:300+Math.cos(t*.4)*240,y:700+Math.sin(t*.33)*260});
+  T('au3',{x:-200+Math.sin(t*.27+2)*260,y:1200+Math.cos(t*.38)*200});
+  T('dotsBg',{x:-(t*10)%36,y:-(t*16)%36,o:.9});
+  const inO=t>=CUT[7];
+  blobs.forEach(b=>{const x=((b.x+b.vx*t)%(W+200)+W+200)%(W+200)-100,y=((b.y+b.vy*t)%(H+200)+H+200)%(H+200)-100;
+    b.d.style.background=inO?'#fff':'#034BAA';T(b.d,{x:x+Math.sin(t*.8+b.ph)*20,y,o:b.a,blur:b.b,s:1+.08*Math.sin(t*1.3+b.ph)})});
+  const hv=P(t,5.6,.5)*(1-P(t,25.7,.3));
+  T('hdr',{o:hv,y:(1-eOut(P(t,5.6,.5)))*-40});T('hdrR',{o:hv,y:(1-eOut(P(t,5.75,.5)))*-40});
+  // stripes
+  let pos=[-3000,-3000,-3000];
+  [5.5,9,15,19,23].forEach(tc=>{for(let k=0;k<3;k++){const p=P(t,tc-.42+k*.06,.72);if(p>0&&p<1)pos[k]=lerp(-2600,1300,eIO(p))}});
+  for(let k=0;k<3;k++)$('wp'+(2-k)).style.transform=`translateX(${pos[k]-k*40}px) skewX(-18deg)`;
+  const ir=eIO(P(t,25.5,.6));$('iris').style.transform=`scale(${ir})`;$('iris').style.opacity=t<CUT[7]+.2?1:0;
+  $('flash').style.opacity=cl(1-Math.abs(t-3.0)/.2)*.95;
+
+  // ---- S1 hook ----
+  if(cur===0){const lt=t;
+    line('h11',lt,.05);line('h12',lt,.2);
+    const lp=eOut5(P(lt,0,.6));const zo=eIn(P(lt,2.6,.4));
+    T('lock',{y:(1-lp)*700,rx:(1-lp)*25,s:(.9+.1*lp)*(1+zo*2.2),o:1});
+    [0,1,2].forEach(i=>{const a=.45+i*.7;const p=eBack(P(lt,a,.45));
+      // newest on top: older ones slide down as new ones arrive
+      const below=[0,1,2].filter(j=>j>i&&lt>=.45+j*.7).length;
+      const tgtY=370+below*178;
+      const n=$('hn'+i);T(n,{x:22,y:lerp(tgtY-260,tgtY,p),s:.9+.1*p,o:eOut(P(lt,a,.2))*(1-below*.12)});
+      n.style.transition='none'});
+    T('hookTag',{s:pop(lt,1.0),o:P(lt,1.0,.1)});
+  }
+  // ---- S2 Freda intro ----
+  if(cur===1){const lt=t-CUT[1];
+    conv.forEach(c=>{const p=eIn(P(lt,c.dl,.5));T(c.d,{x:lerp(c.x,540,p)-c.s/2,y:lerp(c.y,670,p)-c.s/2,s:1-p*.8,o:P(lt,c.dl,.12)*(1-P(lt,c.dl+.45,.06))})});
+    const m=eEl(P(lt,.5,1.0));T('fMark',{s:m,r:(1-eOut(P(lt,.5,.8)))*-60,o:P(lt,.5,.05),y:-eIn(P(lt,2.15,.35))*80});
+    const wp=eExpo(P(lt,.75,.55));$('fWord').style.clipPath=`inset(0 ${(1-wp)*100}% 0 0)`;T('fWord',{x:(1-wp)*-40,y:-eIn(P(lt,2.15,.35))*80});
+    T('fGroup',{o:eOut(P(lt,1.05,.4)),x:(1-eOut5(P(lt,1.05,.6)))*80,y:-eIn(P(lt,2.15,.35))*80});
+    const pr=P(lt,1.2,.5);$('pres').style.letterSpacing=lerp(.9,.5,eOut(pr))+'em';T('pres',{o:eOut(pr)*(1-P(lt,2.15,.3)),y:(1-eOut(pr))*20});
+    T('forC',{s:pop(lt,1.45),o:P(lt,1.45,.1)*(1-P(lt,2.15,.3))});
+  }
+  // ---- S3 desktop ----
+  if(cur===2){const lt=t-CUT[2];
+    line('h31',lt,.05);line('h32',lt,.18);
+    const mp=P(lt,.05,.7);const zo=eIn(P(lt,3.1,.4));
+    T('mon',{y:(1-eOut5(mp))*900,rx:(1-eOut(mp))*35,s:(.85+.15*eOut5(mp))*(1-zo*.15),o:1-zo});
+    $('monImg').style.transform=`translateY(${-eIO(P(lt,1.35,1.8))*1950}px)`;
+    const cu=eIO(P(lt,.6,.45));T('cursor',{x:lerp(900,206,cu),y:lerp(1500,985,cu),o:P(lt,.55,.1)*(1-P(lt,1.4,.2)),s:lt>1.1&&lt<1.22?.85:1});
+    const rp=P(lt,1.12,.45);T('ripple',{x:128-45,y:366-45,s:.3+rp*1.4,o:rp>0?(1-rp):0});
+    const pl=eBack(P(lt,.7,.75)),plOut=eIn(P(lt,3.0,.4));
+    C('popPlane',lerp(745,770,pl)+plOut*700,lerp(860,560,pl)-plOut*300+Math.sin(lt*2.2)*8,{s:lerp(.42,1.05,pl),r:lerp(0,-8,pl),o:P(lt,.7,.05)});
+    $('popPlane').style.filter=`drop-shadow(0 30px 30px rgba(11,27,63,${.3*pl}))`;
+    const sh=eBack(P(lt,1.75,.75)),shOut=eIn(P(lt,3.0,.4));
+    C('popShip',lerp(560,860,sh)+shOut*600,lerp(1000,1200,sh)+Math.sin(lt*2.6)*7,{s:lerp(.35,1,sh),r:lerp(0,6,sh),o:P(lt,1.75,.05)});
+    $('popShip').style.filter=`drop-shadow(0 30px 30px rgba(11,27,63,${.3*sh}))`;
+    [0,1,2].forEach(i=>{const a=2.0+i*.14;T('chips3'+i,{s:pop(lt,a),o:P(lt,a,.08)*(1-P(lt,3.05,.2))})});
+  }
+  // ---- S4 tracking simulation ----
+  if(cur===3){const lt=t-CUT[3];
+    line('h41',lt,.05,5.6);line('h42',lt,.18,5.62);
+    const pp=eOut5(P(lt,.05,.7));T('tPhone',{x:(1-pp)*-700,r:(1-pp)*-12+Math.sin(lt*1.2)*.8,y:Math.sin(lt*1.5)*6});
+    // tap on "Suivre mon colis" then result scan
+    const rp=P(lt,.62,.4);T('tRip',{x:233-40,y:262-40,s:.4+rp*1.6,o:rp>0?(1-rp):0});
+    const sc=P(lt,.7,.6);T('tScan',{y:lerp(300,900,sc),o:sc>0&&sc<1?1:0});
+    let stage=-1;ST.forEach((s,i)=>{if(t>=s)stage=i});
+    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[3];const o=i===0?1:eOut(P(lt,a-.05,.3));$('ts'+i).style.opacity=o});
+    // timeline nodes
+    TL.forEach((s,i)=>{const a=ST[i]-CUT[3];const on=lt>=a;
+      $('tc'+i).style.background=on?s[3]:'#C9D2E3';
+      T('tc'+i,{s:on?eEl(P(lt,a,.8))*.25+.75+(i===stage?.04*Math.sin(lt*6):0):.75});
+      const k=on?((lt-a)%1.1)/1.1:0;T('tr'+i,{s:1+k*.6,o:on&&i===stage?(1-k):0});
+      T('tn'+i,{x:(1-eOut5(P(lt,.25+i*.1,.6)))*600,o:P(lt,.25+i*.1,.1)})});
+    const fillTo=stage<0?0:stage/3;const prevF=stage<=0?0:(stage-1)/3;
+    const fk=stage<0?0:eIO(P(lt,ST[stage]-CUT[3],.6));T('tlFill',{sy:Math.max(.001,lerp(prevF,fillTo,fk)),sx:1});
+    // route bar
+    T('route',{y:(1-eOut5(P(lt,.4,.6)))*400,o:P(lt,.4,.1)});
+    const rf=Math.max(.001,lerp(prevF,fillTo,fk));T('rFill',{sx:rf,sy:1});
+    T('rPlane',{x:40+rf*880-30,y:Math.sin(lt*6)*3,r:Math.sin(lt*3)*4});
+    // push notification for each stage
+    [0,1,2,3].forEach(i=>{const a=ST[i]-CUT[3]+.12;const p=eBack(P(lt,a,.5));const out=eIn(P(lt,a+1.0,.3));
+      T('tnf'+i,{y:lerp(300,520,p)-out*400,s:.92+.08*p,o:P(lt,a,.08)*(1-out)})});
+  }
+  // ---- S5 e-mails ----
+  if(cur===4){const lt=t-CUT[4];
+    line('h51',lt,.05,3.6);line('h52',lt,.18,3.62);
+    const ip=eOut5(P(lt,.1,.6));T('inbox',{y:(1-ip)*-500,o:P(lt,.1,.1)});
+    let n=0;[0,1,2,3].forEach(k=>{const a=.45+(3-k)*.22;const p=eBack(P(lt,a,.5));if(lt>=a)n++;
+      T('row'+k,{x:(1-p)*1000,o:P(lt,a,.08)});T('dot'+k,{s:pop(lt,a+.3,.4)})});
+    $('badge').textContent=n;T('badge',{s:1+.25*cl(1-Math.abs(((lt-.45)%.22)/.22-.1)*3)*(lt<1.4?1:0)});
+    const mc=eBack(P(lt,1.45,.7));T('mailC',{y:(1-mc)*900,r:(1-mc)*8,o:P(lt,1.45,.1)});
+    $('mailImg').style.transform=`translateY(${-eIO(P(lt,2.2,1.6))*780}px)`;
+    const ml=eOut5(P(lt,1.7,.6));T('mailL',{x:(1-ml)*-500,r:-9*ml,s:.9,o:P(lt,1.7,.1)*.95});
+    T('mailR',{x:(1-ml)*500,r:9*ml,s:.9,o:P(lt,1.7,.1)*.95});
+  }
+  // ---- S6 client space ----
+  if(cur===5){const lt=t-CUT[5];
+    line('h61',lt,.05,3.6);line('h62',lt,.18,3.62);
+    const lp=eOut5(P(lt,.1,.7));T('aLap',{s:.7+.3*lp,rx:(1-lp)*-30,y:(1-lp)*120+Math.sin(lt*1.3)*5,o:P(lt,.1,.1)});
+    $('admImg').style.transform=`translateY(${-eIO(P(lt,1.4,1.6))*0}px)`;
+    T('admTag',{s:pop(lt,1.0),o:P(lt,1.0,.1)});
+    const cp=eBack(P(lt,.35,.7));T('cPhone',{x:(1-cp)*500,r:(1-cp)*20+Math.sin(lt*1.4)*1,y:Math.sin(lt*1.8)*8});
+    const sw=eIO(P(lt,1.9,.7));T('dashImg',{y:-sw*420,o:1});T('dashImg2',{y:(1-sw)*420,o:sw});
+    [0,1,2,3].forEach(i=>{const a=1.3+i*.15;T('chips6'+i,{s:pop(lt,a),o:P(lt,a,.08)*(1-P(lt,3.6,.2))})});
+  }
+  // ---- S7 multi device ----
+  if(cur===6){const lt=t-CUT[6];
+    line('h71',lt,.05,2.6);line('h72',lt,.15,2.62);
+    [0,1,2].forEach(i=>{const a=.6+i*.12;T('ring7'+i,{s:pop(lt,a),o:P(lt,a,.08)*(1-P(lt,2.6,.2))})});
+    T('grp',{s:1+lt*.02,ry:Math.sin(lt*.9)*3,o:1-eIn(P(lt,2.6,.4))});
+    const lp=eOut5(P(lt,0,.6));T('lap',{s:.6+.4*lp,o:P(lt,0,.1),rx:(1-lp)*-30,y:(1-lp)*80});
+    const tp=eBack(P(lt,.2,.6));T('tab',{x:(1-tp)*-600,r:(1-tp)*-25,y:Math.sin(lt*1.7)*8});
+    const pp=eBack(P(lt,.35,.6));T('pho',{x:(1-pp)*600,r:(1-pp)*25,y:Math.sin(lt*1.9+1)*10});
+    $('lapImg').style.transform=`translateY(${-eIO(P(lt,.5,2.4))*1500}px)`;
+    $('tabImg').style.transform=`translateY(${-eIO(P(lt,.6,2.3))*1400}px)`;
+    $('phoImg').style.transform=`translateY(${-eIO(P(lt,.7,2.2))*2400}px)`;
+    const rp=P(lt,.6,2.0);const st=Math.abs(Math.sin(lt*Math.PI*5));
+    C('runner',lerp(-240,1320,rp),1610-st*26,{r:-4+st*4,o:rp>0&&rp<1?1:0});
+    $('runner').style.filter='drop-shadow(0 26px 18px rgba(11,27,63,.25))';
+  }
+  // ---- S8 outro ----
+  if(cur===7){const lt=t-CUT[7];
+    burst.forEach(b=>{const p=eOut5(P(lt,.2+b.dl,1.4));T(b.d,{x:540+Math.cos(b.a)*b.R*p-b.s/2,y:430+Math.sin(b.a)*b.R*p-b.s/2,o:P(lt,.2,.05)*(1-p)*.8,s:1-p*.5})});
+    T('wMark',{s:eEl(P(lt,.1,1.1)),r:(1-eOut(P(lt,.1,.9)))*90,o:P(lt,.1,.05),y:Math.sin(lt*1.6)*6});
+    const wp=eExpo(P(lt,.5,.55));$('wWord').style.clipPath=`inset(0 ${(1-wp)*100}% 0 0)`;T('wWord',{x:(1-wp)*-40});
+    T('wGroup',{o:eOut(P(lt,.8,.4)),x:(1-eOut5(P(lt,.8,.6)))*80});
+    line('h81',lt,.9);line('h82',lt,1.02);
+    T('ctaP',{s:pop(lt,1.4),o:P(lt,1.4,.1)});
+    T('ctaW',{s:pop(lt,1.6)*(1+.02*Math.sin(Math.max(0,lt-2.2)*7)),o:P(lt,1.6,.1)});
+    T('foot',{o:eOut(P(lt,2.0,.6)),y:(1-eOut(P(lt,2.0,.6)))*24});
+    $('stage').style.opacity=1-P(lt,3.65,.35);
+  } else $('stage').style.opacity=1;
+};
+function fit(){document.querySelectorAll('.mask span').forEach(sp=>{sp.style.display='inline-block';
+  const fs=sp.dataset.fs||(sp.dataset.fs=parseFloat(getComputedStyle(sp).fontSize));sp.style.fontSize=fs+'px';
+  const w=sp.getBoundingClientRect().width;if(w>960)sp.style.fontSize=(fs*960/w)+'px';sp.style.display='block'})}
+window.fit=fit;document.fonts.ready.then(()=>{fit();render(0)});
+render(0);
+</script>
+</body></html>
