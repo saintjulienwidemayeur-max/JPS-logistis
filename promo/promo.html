@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>JP's Logistics & More — Promo 9:16</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0A1226}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:'Inter',sans-serif;color:#fff;background:linear-gradient(180deg,#0A1226 0%,#0B1B3F 55%,#0D2B80 130%)}
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity}
+.scene{position:absolute;inset:0;visibility:hidden;perspective:2200px}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:900;text-transform:uppercase;line-height:.95;letter-spacing:.005em}
+.orange{color:#FF5500}.sky{color:#7EC8FF}
+.mask{overflow:hidden;position:absolute;left:0;width:1080px;text-align:center}
+.mask span{display:block;will-change:transform;white-space:nowrap}
+.pill{position:absolute;border-radius:999px;font-weight:700}
+svg{overflow:visible}
+</style></head>
+<body>
+<div id="stage">
+
+  <!-- ambient background -->
+  <div class="abs" id="glow1" style="width:1100px;height:1100px;border-radius:50%;background:radial-gradient(closest-side,rgba(30,136,229,.42),transparent)"></div>
+  <div class="abs" id="glow2" style="width:900px;height:900px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,85,0,.20),transparent)"></div>
+  <div class="abs" id="grid" style="left:-100px;top:-100px;width:1300px;height:2100px;opacity:.10;background-image:linear-gradient(#7EC8FF 1px,transparent 1px),linear-gradient(90deg,#7EC8FF 1px,transparent 1px);background-size:90px 90px"></div>
+  <div id="dots"></div>
+
+  <!-- ========== SCENE 1 : HOOK ========== -->
+  <div class="scene" id="s1">
+    <div class="abs" id="s1kick" style="top:560px;width:1080px;text-align:center;font-weight:700;font-size:38px;letter-spacing:.34em;color:#7EC8FF">FRET AÉRIEN &amp; MARITIME</div>
+    <div class="mask" style="top:640px;height:240px"><span id="l1" class="disp" style="font-size:230px">Ton colis</span></div>
+    <div class="mask" style="top:870px;height:240px"><span id="l2" class="disp" style="font-size:230px">de Miami</span></div>
+    <div class="mask" style="top:1100px;height:240px"><span id="l3" class="disp orange" style="font-size:230px">à Haïti</span></div>
+    <div class="abs" id="s1bar" style="left:240px;top:1380px;width:600px;height:12px;background:linear-gradient(90deg,#FF5500,#FF8A3D);border-radius:6px;transform-origin:0 50%"></div>
+  </div>
+
+  <!-- ========== SCENE 2 : ROUTE ========== -->
+  <div class="scene" id="s2">
+    <div class="mask" style="top:235px;height:150px"><span id="r1" class="disp" style="font-size:140px">On relie</span></div>
+    <div class="mask" style="top:370px;height:150px"><span id="r2" class="disp orange" style="font-size:140px">Miami à Haïti</span></div>
+    <div class="abs" id="rsub" style="top:545px;width:1080px;text-align:center;font-size:44px;font-weight:600;color:#A9B6D6">Par avion ou par bateau</div>
+    <svg class="abs" width="1080" height="1920" viewBox="0 0 1080 1920">
+      <defs>
+        <filter id="glowF" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="airG" x1="0" x2="1"><stop offset="0" stop-color="#FF8A3D"/><stop offset="1" stop-color="#FF5500"/></linearGradient>
+        <linearGradient id="seaG" x1="0" x2="1"><stop offset="0" stop-color="#7EC8FF"/><stop offset="1" stop-color="#1E88E5"/></linearGradient>
+      </defs>
+      <g id="mapdots"></g>
+      <path id="airPath" d="M220 1380 Q 230 760 860 880" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="5" stroke-dasharray="3 20" stroke-linecap="round"/>
+      <path id="seaPath" d="M220 1380 Q 800 1620 860 880" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="5" stroke-dasharray="3 20" stroke-linecap="round"/>
+      <path id="airDraw" d="M220 1380 Q 230 760 860 880" fill="none" stroke="url(#airG)" stroke-width="9" stroke-linecap="round" filter="url(#glowF)"/>
+      <path id="seaDraw" d="M220 1380 Q 800 1620 860 880" fill="none" stroke="url(#seaG)" stroke-width="9" stroke-linecap="round" filter="url(#glowF)"/>
+      <!-- nodes -->
+      <g id="nodeM" transform="translate(220 1380)">
+        <circle id="ringM1" r="30" fill="none" stroke="#7EC8FF" stroke-width="4"/>
+        <circle id="ringM2" r="30" fill="none" stroke="#7EC8FF" stroke-width="4"/>
+        <circle r="26" fill="#0D2B80" stroke="#fff" stroke-width="6"/><circle r="9" fill="#fff"/>
+      </g>
+      <g id="nodeH" transform="translate(860 880)">
+        <circle id="ringH1" r="30" fill="none" stroke="#FF5500" stroke-width="4"/>
+        <circle id="ringH2" r="30" fill="none" stroke="#FF5500" stroke-width="4"/>
+        <circle r="26" fill="#FF5500" stroke="#fff" stroke-width="6"/><circle r="9" fill="#fff"/>
+      </g>
+      <!-- vehicles -->
+      <g id="plane" filter="url(#glowF)"><g transform="translate(-60 -60) scale(1.2)" fill="#fff">
+        <path d="M4 50 Q4 44 14 44 L80 44 Q98 46 98 50 Q98 54 80 56 L14 56 Q4 56 4 50Z"/>
+        <path d="M44 46 L30 10 L42 10 L68 46Z M44 54 L30 90 L42 90 L68 54Z"/>
+        <path d="M10 46 L2 30 L12 30 L24 46Z M10 54 L2 70 L12 70 L24 54Z"/></g></g>
+      <g id="ship" filter="url(#glowF)"><g transform="translate(-75 -62) scale(1.5)">
+        <path d="M6 58 L94 58 L80 82 L20 82Z" fill="#fff"/>
+        <rect x="14" y="40" width="14" height="16" fill="#FF5500"/><rect x="30" y="40" width="14" height="16" fill="#7EC8FF"/>
+        <rect x="46" y="40" width="14" height="16" fill="#FF5500"/><rect x="22" y="24" width="14" height="14" fill="#7EC8FF"/>
+        <rect x="38" y="24" width="14" height="14" fill="#fff"/><rect x="64" y="26" width="22" height="30" fill="#DDE3F0"/>
+        <rect x="68" y="31" width="14" height="7" fill="#0D2B80"/></g></g>
+    </svg>
+    <div class="abs pill" id="lblM" style="left:60px;top:1445px;padding:20px 34px;background:#fff;color:#0D2B80;font-size:40px;line-height:1.1">MIAMI<div style="font-size:26px;font-weight:600;color:#5B6479;margin-top:4px">8125 NW 67th St, FL 33166</div></div>
+    <div class="abs pill" id="lblH" style="left:560px;top:740px;padding:20px 34px;background:#FF5500;color:#fff;font-size:40px;line-height:1.1;border-radius:44px">PÉTION-VILLE<div style="font-size:26px;font-weight:600;color:#FFE1D1;margin-top:4px">11, Rue Rogé · Haïti</div></div>
+    <div class="abs" id="chipA" style="left:80px;top:1650px;width:430px;height:110px;border-radius:28px;background:rgba(255,85,0,.16);border:2px solid #FF5500;display:flex;align-items:center;gap:20px;padding:0 26px;font-size:34px;font-weight:700">
+      <svg width="56" height="56" viewBox="0 0 100 100" fill="#FF5500"><path d="M4 50 Q4 44 14 44 L80 44 Q98 46 98 50 Q98 54 80 56 L14 56 Q4 56 4 50Z"/><path d="M44 46 L30 10 L42 10 L68 46Z M44 54 L30 90 L42 90 L68 54Z"/><path d="M10 46 L2 30 L12 30 L24 46Z M10 54 L2 70 L12 70 L24 54Z"/></svg>Fret aérien</div>
+    <div class="abs" id="chipS" style="left:570px;top:1650px;width:430px;height:110px;border-radius:28px;background:rgba(30,136,229,.2);border:2px solid #7EC8FF;display:flex;align-items:center;gap:20px;padding:0 26px;font-size:34px;font-weight:700">
+      <svg width="64" height="56" viewBox="0 0 100 90" fill="#7EC8FF"><path d="M6 58 L94 58 L80 82 L20 82Z"/><rect x="14" y="40" width="14" height="16"/><rect x="30" y="40" width="14" height="16"/><rect x="46" y="40" width="14" height="16"/><rect x="22" y="24" width="14" height="14"/><rect x="64" y="26" width="22" height="30"/></svg>Cargo maritime</div>
+  </div>
+
+  <!-- ========== SCENE 3 : SERVICES ========== -->
+  <div class="scene" id="s3">
+    <div class="mask" style="top:215px;height:170px"><span id="v1" class="disp" style="font-size:150px">Un seul dépôt.</span></div>
+    <div class="mask" style="top:365px;height:170px"><span id="v2" class="disp orange" style="font-size:150px">Tous vos envois.</span></div>
+    <div class="abs" id="vsub" style="top:540px;width:1080px;text-align:center;font-size:40px;font-weight:600;color:#A9B6D6">Du colis familial au conteneur commercial</div>
+    <div id="cards"></div>
+  </div>
+
+  <!-- ========== SCENE 4 : TRACKING ========== -->
+  <div class="scene" id="s4">
+    <div class="mask" style="top:215px;height:170px"><span id="t1" class="disp" style="font-size:150px">Suivez chaque colis</span></div>
+    <div class="mask" style="top:355px;height:170px"><span id="t2" class="disp orange" style="font-size:150px">en direct</span></div>
+    <div class="abs" id="phone" style="left:200px;top:540px;width:680px;height:1120px;border-radius:84px;background:linear-gradient(145deg,#26345f,#0b1327);padding:16px;box-shadow:0 60px 120px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.12) inset">
+      <div style="position:relative;width:100%;height:100%;border-radius:70px;background:#EEF2FB;overflow:hidden">
+        <div style="height:210px;background:linear-gradient(135deg,#0D2B80,#1E88E5);padding:62px 44px 0;color:#fff">
+          <div style="font-size:30px;font-weight:600;opacity:.8">JP's Logistics &amp; More</div>
+          <div class="disp" style="font-size:72px;margin-top:6px">Suivi de colis</div>
+        </div>
+        <div style="margin:-34px 34px 0;background:#fff;border-radius:28px;padding:22px 26px;box-shadow:0 14px 40px rgba(13,43,128,.18);position:relative">
+          <div style="font-size:22px;font-weight:700;color:#5B6479;letter-spacing:.08em">NUMÉRO DE SUIVI</div>
+          <div style="display:flex;align-items:center;margin-top:8px;height:66px;border-radius:16px;background:#EEF2FB;padding:0 20px;font-size:36px;font-weight:700;color:#0B1B3F"><span id="typed"></span><span id="caret" style="width:3px;height:40px;background:#FF5500;margin-left:3px"></span></div>
+          <div id="trackBtn" style="margin-top:16px;height:70px;border-radius:18px;background:#FF5500;color:#fff;font-weight:800;font-size:30px;display:flex;align-items:center;justify-content:center">Suivre mon colis</div>
+        </div>
+        <div style="margin:26px 34px 0;position:relative;height:560px">
+          <div style="position:absolute;left:35px;top:36px;width:6px;height:420px;background:#DDE3F0;border-radius:3px"></div>
+          <div id="tfill" style="position:absolute;left:35px;top:36px;width:6px;height:420px;background:linear-gradient(#1E88E5,#25D366);border-radius:3px;transform-origin:0 0"></div>
+          <div id="steps"></div>
+        </div>
+      </div>
+    </div>
+    <div class="abs" id="toast" style="left:150px;top:560px;width:780px;height:150px;border-radius:40px;background:rgba(255,255,255,.96);color:#0B1B3F;box-shadow:0 30px 70px rgba(0,0,0,.5);display:flex;align-items:center;gap:26px;padding:0 30px">
+      <div style="width:90px;height:90px;border-radius:24px;background:#0D2B80;display:flex;align-items:center;justify-content:center;flex:none"><img src="logo-white.png" style="width:66px;"></div>
+      <div><div style="font-size:24px;font-weight:700;color:#5B6479">JP's Logistics · maintenant</div><div style="font-size:34px;font-weight:800;margin-top:4px;line-height:1.15">Votre colis est prêt<br>pour retrait</div></div>
+    </div>
+  </div>
+
+  <!-- ========== SCENE 5 : MIAMI ADDRESS ========== -->
+  <div class="scene" id="s5">
+    <div class="mask" style="top:215px;height:160px"><span id="a1" class="disp" style="font-size:140px">Créez votre compte,</span></div>
+    <div class="mask" style="top:350px;height:160px"><span id="a2" class="disp orange" style="font-size:140px">Votre adresse Miami</span></div>
+    <div class="abs" id="addr" style="left:110px;top:620px;width:860px;height:640px;border-radius:50px;background:#fff;color:#0B1B3F;padding:56px 60px;box-shadow:0 60px 110px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;gap:18px">
+        <svg width="46" height="56" viewBox="0 0 46 56"><path d="M23 0C10 0 0 10 0 23c0 17 23 33 23 33s23-16 23-33C46 10 36 0 23 0z" fill="#FF5500"/><circle cx="23" cy="23" r="9" fill="#fff"/></svg>
+        <div style="font-size:34px;font-weight:800;color:#0D2B80;letter-spacing:.04em">VOTRE ADRESSE MIAMI</div>
+      </div>
+      <div style="height:4px;background:#EEF2FB;margin:30px 0"></div>
+      <div id="addrLines" style="font-size:50px;font-weight:700;line-height:1.5;min-height:300px"></div>
+      <div id="copyBtn" style="position:absolute;left:60px;bottom:50px;width:740px;height:96px;border-radius:26px;background:#0D2B80;color:#fff;font-size:38px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:16px"><span id="copyTxt">Copier</span></div>
+    </div>
+    <div class="abs" id="langs" style="left:0;top:1350px;width:1080px;text-align:center;font-size:36px;font-weight:600;color:#A9B6D6"></div>
+    <div id="chips"></div>
+  </div>
+
+  <!-- ========== SCENE 6 : CTA ========== -->
+  <div class="scene" id="s6">
+    <div class="abs" id="s6bg" style="inset:0;width:1080px;height:1920px;background:radial-gradient(circle at 50% 30%,#1E4FD0 0%,#0D2B80 55%,#0A1B5A 100%)"></div>
+    <div class="abs" id="s6rings"></div>
+    <img class="abs" id="bigLogo" src="logo-white.png" style="left:190px;top:170px;width:700px;">
+    <div class="mask" style="top:610px;height:150px"><span id="c1" class="disp" style="font-size:132px">De Miami à Haïti,</span></div>
+    <div class="mask" style="top:745px;height:150px"><span id="c2" class="disp" style="font-size:132px;color:#FFB48A">on livre avec confiance</span></div>
+    <div class="abs" id="cta" style="left:130px;top:1000px;width:820px;height:130px;border-radius:65px;background:#FF5500;display:flex;align-items:center;justify-content:center;gap:22px;font-size:50px;font-weight:800;box-shadow:0 20px 60px rgba(255,85,0,.5)">
+      Suivre un colis
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 24h30M26 11l13 13-13 13"/></svg>
+    </div>
+    <div class="abs" id="ct1" style="left:130px;top:1190px;width:820px;height:118px;border-radius:30px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.28);display:flex;align-items:center;gap:26px;padding:0 34px">
+      <svg width="46" height="56" viewBox="0 0 46 56"><path d="M23 0C10 0 0 10 0 23c0 17 23 33 23 33s23-16 23-33C46 10 36 0 23 0z" fill="#7EC8FF"/><circle cx="23" cy="23" r="9" fill="#0D2B80"/></svg>
+      <div><div style="font-size:24px;font-weight:700;color:#A9C9FF;letter-spacing:.1em">MIAMI</div><div style="font-size:44px;font-weight:800">+1 (786) 424-8025</div></div></div>
+    <div class="abs" id="ct2" style="left:130px;top:1330px;width:820px;height:118px;border-radius:30px;background:rgba(37,211,102,.18);border:2px solid #25D366;display:flex;align-items:center;gap:26px;padding:0 34px">
+      <img src="whatsapp.png" style="width:56px;height:56px">
+      <div><div style="font-size:24px;font-weight:700;color:#8EF0B3;letter-spacing:.1em">WHATSAPP · HAÏTI</div><div style="font-size:44px;font-weight:800">+509 3702-1722</div></div></div>
+    <div class="abs" id="tag" style="left:0;top:1520px;width:1080px;text-align:center;font-size:32px;font-style:normal;font-weight:600;color:#A9C9FF;letter-spacing:.03em">Connecting Haiti to the world, one package at a time.</div>
+  </div>
+
+  <!-- persistent logo + progress -->
+  <img class="abs" id="topLogo" src="logo-white.png" style="left:56px;top:56px;width:170px;;opacity:0">
+  <div class="abs" id="prog" style="left:0;top:1908px;width:1080px;height:12px;background:#FF5500;transform-origin:0 50%"></div>
+
+  <!-- transition wipes -->
+  <div class="abs" id="wipeA" style="left:0;top:-200px;width:1900px;height:2320px;background:#FF5500;transform:translateX(-2000px) skewX(-15deg)"></div>
+  <div class="abs" id="wipeB" style="left:0;top:-200px;width:1900px;height:2320px;background:#1E88E5;transform:translateX(-2000px) skewX(-15deg)"></div>
+</div>
+
+<script>
+const W=1080,H=1920,DUR=23;
+const cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const P=(t,a,d)=>cl((t-a)/d);
+const eOut=x=>1-Math.pow(1-x,3);
+const eOut5=x=>1-Math.pow(1-x,5);
+const eIO=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eBack=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const eElastic=x=>x===0?0:x===1?1:Math.pow(2,-10*x)*Math.sin((x*10-.75)*(2*Math.PI/3))+1;
+const $=id=>document.getElementById(id);
+function T(el,o){ if(typeof el==='string') el=$(el);
+  const {x=0,y=0,s=1,sx=s,sy=s,r=0,o:op=1,skx=0,blur=0,ry=0,rx=0}=o;
+  el.style.transform=`translate3d(${x}px,${y}px,0) rotateX(${rx}deg) rotateY(${ry}deg) rotate(${r}deg) skewX(${skx}deg) scale(${sx},${sy})`;
+  el.style.opacity=op; el.style.filter=blur?`blur(${blur}px)`:'';
+}
+function V(el,v){ (typeof el==='string'?$(el):el).style.visibility=v?'visible':'hidden'; }
+// slide-up text reveal inside a mask (with exit)
+function line(id,t,a,exitAt){
+  const i=eOut5(P(t,a,.7)); const e=exitAt!=null?eIO(P(t,exitAt,.5)):0;
+  const y=(1-i)*115 - e*115;
+  T(id,{y:`${y}`.length?y*2.2:0,skx:(1-i)*-8});
+  $(id).style.transform=`translateY(${y}%) skewX(${(1-i)*-8}deg)`;
+}
+
+// ---- scene timing (120 BPM, 2s bars) ----
+const B=[0,3,7,11,15,18,DUR];
+
+// ---- ambient dots ----
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const dots=[];(function(){const c=$('dots');for(let i=0;i<46;i++){const d=document.createElement('div');d.className='abs';const s=3+rnd()*7;
+  d.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;background:#7EC8FF`;c.appendChild(d);dots.push({d,x:rnd()*W,y:rnd()*H,v:18+rnd()*60,a:.12+rnd()*.35,ph:rnd()*6})}})();
+// map dots (scene 2)
+(function(){const g=document.getElementById('mapdots');let h='';
+  for(let x=40;x<W;x+=44)for(let y=560;y<1700;y+=44){
+    const cx=(x-560)/520, cy=(y-1130)/560; const d=Math.sqrt(cx*cx+cy*cy);
+    const n=Math.sin(x*.021)+Math.cos(y*.027)+Math.sin((x+y)*.013);
+    const a=cl(1-d)*(n>0.2?.55:.12);
+    if(a>.04)h+=`<circle cx="${x}" cy="${y}" r="3.2" fill="#7EC8FF" opacity="${a.toFixed(2)}"/>`}
+  g.innerHTML=h;g.style.opacity=0;})();
+
+// ---- services cards ----
+const SERV=[
+ {t:'Fret aérien express',s:'Rapide, pour les envois urgents',c:'#FF5500',ic:'<path d="M4 50 Q4 44 14 44 L80 44 Q98 46 98 50 Q98 54 80 56 L14 56 Q4 56 4 50Z"/><path d="M44 46 L30 10 L42 10 L68 46Z M44 54 L30 90 L42 90 L68 54Z"/><path d="M10 46 L2 30 L12 30 L24 46Z M10 54 L2 70 L12 70 L24 54Z"/>',vb:'0 0 100 100'},
+ {t:'Cargo maritime & conteneurs',s:'Gros volumes, tarif économique',c:'#1E88E5',ic:'<path d="M6 60 L94 60 L80 84 L20 84Z"/><rect x="12" y="42" width="15" height="16"/><rect x="30" y="42" width="15" height="16"/><rect x="48" y="42" width="15" height="16"/><rect x="21" y="24" width="15" height="16"/><rect x="66" y="26" width="22" height="32"/>',vb:'0 0 100 100'},
+ {t:'Sourcing & importation',s:'Fournisseurs & matériel importés pour vous',c:'#7C5CFF',ic:'<path d="M50 6 L90 26 L90 72 L50 94 L10 72 L10 26Z" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round"/><path d="M10 26 L50 48 L90 26 M50 48 V94" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>',vb:'0 0 100 100',keep:true},
+ {t:'Envoi de documents',s:'Rapide, fiable et confidentiel',c:'#25B66B',ic:'<path d="M20 6 H58 L80 28 V94 H20Z M58 6 V28 H80" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round"/><path d="M34 52 H66 M34 70 H66" stroke="#fff" stroke-width="9" stroke-linecap="round"/>',vb:'0 0 100 100',keep:true}];
+(function(){const c=$('cards');SERV.forEach((s,i)=>{const d=document.createElement('div');d.className='abs';d.id='card'+i;
+  d.style.cssText=`left:80px;top:${625+i*272}px;width:920px;height:244px;border-radius:44px;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;gap:36px;padding:0 40px;overflow:hidden`;
+  d.innerHTML=`<div id="cardic${i}" style="width:150px;height:150px;border-radius:44px;background:${s.c};display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 18px 40px ${s.c}66"><svg width="84" height="84" viewBox="${s.vb}" fill="#fff">${s.ic}</svg></div>
+  <div><div style="font-size:42px;font-weight:800;line-height:1.1">${s.t}</div><div style="font-size:30px;font-weight:500;color:#A9B6D6;margin-top:10px;line-height:1.25">${s.s}</div></div>
+  <div id="shine${i}" style="position:absolute;top:0;left:-300px;width:160px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg)"></div>`;
+  c.appendChild(d)})})();
+
+// ---- tracking steps ----
+const STEPS=[['Reçu à Miami','Entrepôt · Miami, FL'],['En transit / douane','Fret vers Haïti'],['Arrivé en Haïti','Pétion-Ville'],['Prêt pour retrait','11, Rue Rogé']];
+(function(){const c=$('steps');STEPS.forEach((s,i)=>{const d=document.createElement('div');d.id='step'+i;d.className='abs';
+  d.style.cssText=`left:0;top:${i*140}px;width:100%;height:100px;display:flex;align-items:center;gap:26px`;
+  d.innerHTML=`<div id="stc${i}" style="width:72px;height:72px;border-radius:50%;background:#1E88E5;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 8px 22px rgba(30,136,229,.4)"><svg width="38" height="38" viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21l9 9 17-19"/></svg></div>
+  <div><div style="font-size:36px;font-weight:800;color:#0B1B3F">${s[0]}</div><div style="font-size:25px;font-weight:600;color:#5B6479;margin-top:3px">${s[1]}</div></div>`;
+  c.appendChild(d)})})();
+
+// ---- scene 5 chips ----
+const CH=['Espace client','Suivi en direct','FR · EN · ES'];
+(function(){const c=$('chips');CH.forEach((s,i)=>{const d=document.createElement('div');d.className='abs pill';d.id='chip'+i;
+  const w=[320,340,260][i];const xs=[80,430,790];
+  d.style.cssText=`left:${[70,420,790][i]}px;top:1430px;height:92px;width:${[330,350,220][i]}px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.3)`;
+  d.textContent=s;c.appendChild(d)})})();
+
+// ---- scene 6 rings ----
+(function(){const c=$('s6rings');for(let i=0;i<3;i++){const d=document.createElement('div');d.className='abs';d.id='ring'+i;
+  d.style.cssText='left:140px;top:560px;width:800px;height:800px;border-radius:50%;border:3px solid rgba(126,200,255,.35)';c.appendChild(d)}})();
+
+// ================= MASTER RENDER =================
+const airL=$('airPath').getTotalLength(), seaL=$('seaPath').getTotalLength();
+function ang(path,L,p){const a=path.getPointAtLength(Math.max(0,L*p-2)),b=path.getPointAtLength(Math.min(L,L*p+2));return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
+
+window.render=function(t){
+  // ambient
+  T('glow1',{x:-200+Math.sin(t*.5)*160+(t/DUR)*180,y:300+Math.cos(t*.4)*200});
+  T('glow2',{x:380+Math.cos(t*.45)*220,y:1000+Math.sin(t*.5)*220});
+  T('grid',{x:-(t*14)%90,y:(t*20)%90});
+  dots.forEach(o=>{const y=(((o.y-o.v*t)%H)+H)%H;T(o.d,{x:o.x+Math.sin(t+o.ph)*14,y:y,o:o.a*(.6+.4*Math.sin(t*1.5+o.ph))})});
+
+  // scene visibility
+  let cur=0;for(let i=0;i<6;i++)if(t>=B[i])cur=i;
+  for(let i=0;i<6;i++)V('s'+(i+1),i===cur);
+
+  // wipes at boundaries 1..5
+  let wa=-2200,wb=-2200;
+  for(let i=1;i<=5;i++){const tc=B[i];const p=P(t,tc-.4,.8);if(p>0&&p<1){wa=-1900+eIO(p)*3000;
+    const q=P(t,tc-.4+.12,.8);wb=-1900+eIO(q)*3000-150}}
+  // trailing second panel draws slightly behind
+  $('wipeA').style.transform=`translateX(${wa}px) skewX(-15deg)`;
+  $('wipeB').style.transform=`translateX(${wb}px) skewX(-15deg)`;
+  $('wipeB').style.zIndex=1;$('wipeA').style.zIndex=2;
+
+  // persistent
+  const ll=cl(P(t,.4,.6))*(1-P(t,B[5]-.2,.3));
+  T('topLogo',{o:ll,y:(1-eOut(P(t,.4,.6)))*-30});
+  T('prog',{sx:t/DUR,sy:1});
+
+  // ---------- S1 ----------
+  if(cur===0){const lt=t-B[0];
+    T('s1kick',{o:eOut(P(lt,.1,.5)),y:(1-eOut(P(lt,.1,.5)))*30});
+    line('l1',lt,.25,2.5);line('l2',lt,.5,2.58);line('l3',lt,.75,2.66);
+    // add punch scale on whole group at exit
+    T('s1bar',{sx:eOut5(P(lt,1.1,.7))*(1-eIO(P(lt,2.6,.4))),sy:1,x:0});
+    $('s1kick').style.opacity=eOut(P(lt,.1,.5))*(1-P(lt,2.4,.3));
+  }
+  // ---------- S2 ----------
+  if(cur===1){const lt=t-B[1];
+    line('r1',lt,.55);line('r2',lt,.75);
+    T('rsub',{o:eOut(P(lt,1.05,.5)),y:(1-eOut(P(lt,1.05,.5)))*24});
+    $('mapdots').style.opacity=eOut(P(lt,.5,.9));
+    // nodes
+    const nm=eBack(P(lt,.9,.5));T('nodeM',{x:220,y:1380,s:Math.max(.001,nm)});
+    const nh=eBack(P(lt,1.9,.5));T('nodeH',{x:860,y:880,s:Math.max(.001,nh)});
+    [['ringM1',.9,.0],['ringM2',.9,.55],['ringH1',2.2,0],['ringH2',2.2,.55]].forEach(([id,a,dl])=>{
+      const k=((lt-a-dl)%1.1+1.1)%1.1/1.1;const on=lt>a+dl?1:0;
+      $(id).setAttribute('r',30+k*70);$(id).style.opacity=on*(1-k)*.8});
+    // air
+    const pa=eIO(P(lt,1.0,1.5));
+    $('airDraw').style.strokeDasharray=`${airL*pa} ${airL*2}`;
+    const ap=$('airPath').getPointAtLength(airL*pa);
+    $('plane').setAttribute('transform',`translate(${ap.x} ${ap.y}) rotate(${ang($('airPath'),airL,pa)}) scale(${(eOut(P(lt,.9,.3))*(1-P(lt,2.6,.3)*0)).toFixed(3)})`);
+    $('plane').style.opacity=pa>0?1:0;
+    // sea
+    const ps=eIO(P(lt,1.3,2.3));
+    $('seaDraw').style.strokeDasharray=`${seaL*ps} ${seaL*2}`;
+    const sp=$('seaPath').getPointAtLength(seaL*ps);
+    const bob=Math.sin(lt*5)*5;
+    $('ship').setAttribute('transform',`translate(${sp.x} ${sp.y+bob}) rotate(${Math.sin(lt*4)*3}) scale(${eOut(P(lt,1.2,.3)).toFixed(3)})`);
+    $('ship').style.opacity=ps>0?1:0;
+    // labels
+    const lm=eBack(P(lt,1.1,.5)),lh=eBack(P(lt,2.35,.5));
+    T('lblM',{s:Math.max(.001,lm),o:P(lt,1.1,.2)});$('lblM').style.transformOrigin='0 0';
+    T('lblH',{s:Math.max(.001,lh),o:P(lt,2.35,.2)});$('lblH').style.transformOrigin='100% 100%';
+    T('chipA',{x:(1-eOut5(P(lt,2.7,.6)))*-700,o:P(lt,2.7,.2)});
+    T('chipS',{x:(1-eOut5(P(lt,2.85,.6)))*700,o:P(lt,2.85,.2)});
+    // fade-out headline slight
+  }
+  // ---------- S3 ----------
+  if(cur===2){const lt=t-B[2];
+    line('v1',lt,.1,3.5);line('v2',lt,.3,3.55);
+    T('vsub',{o:eOut(P(lt,.7,.5))*(1-P(lt,3.45,.3)),y:(1-eOut(P(lt,.7,.5)))*24});
+    SERV.forEach((s,i)=>{const a=.55+i*.28;const p=eBack(P(lt,a,.8));
+      const ex=eIO(P(lt,3.45+i*.05,.5));
+      T('card'+i,{x:(1-p)*1150-ex*1200,o:P(lt,a,.1),r:(1-p)*4});
+      const sh=P(lt,a+.7,.9);$('shine'+i).style.transform=`translateX(${sh*1400}px) skewX(-20deg)`;
+      T('cardic'+i,{s:.6+.4*eElastic(P(lt,a+.35,.9)),r:(1-eElastic(P(lt,a+.35,.9)))*-25})});
+  }
+  // ---------- S4 ----------
+  if(cur===3){const lt=t-B[3];
+    line('t1',lt,.1,3.4);line('t2',lt,.3,3.45);
+    const pp=eOut5(P(lt,.2,.9));const pe=eIO(P(lt,3.45,.5));
+    T('phone',{y:(1-pp)*1500+pe*1500+Math.sin(lt*1.3)*8,ry:(1-pp)*-35+Math.sin(lt*.8)*3,rx:(1-pp)*12,s:1});
+    const txt='JPS-48213';const tp=P(lt,.6,.7);
+    $('typed').textContent=txt.slice(0,Math.floor(tp*txt.length+.0001));
+    $('caret').style.opacity=Math.floor(lt*3)%2===0||tp<1?1:0;
+    const pr=P(lt,1.4,.18);const pressed=lt>1.4&&lt<1.6;
+    $('trackBtn').style.transform=pressed?'scale(.94)':'scale(1)';$('trackBtn').style.filter=pressed?'brightness(1.2)':'';
+    // steps
+    STEPS.forEach((s,i)=>{const a=1.65+i*.38;const p=eBack(P(lt,a,.45));
+      T('step'+i,{x:(1-eOut(P(lt,a,.4)))*60,o:P(lt,a,.25)});
+      T('stc'+i,{s:Math.max(.001,p)});
+      if(i===3)$('stc3').style.background='#25D366';
+    });
+    T('tfill',{sx:1,sy:eIO(P(lt,1.7,1.15))});
+    // toast
+    const tp2=eBack(P(lt,2.85,.55));const tx=eIO(P(lt,3.5,.4));
+    T('toast',{y:(1-tp2)*-330-tx*330,o:P(lt,2.85,.1)});
+  }
+  // ---------- S5 ----------
+  if(cur===4){const lt=t-B[4];
+    line('a1',lt,.05,2.5);line('a2',lt,.25,2.55);
+    const p=eOut5(P(lt,.35,.8));const ex=eIO(P(lt,2.5,.5));
+    T('addr',{y:(1-p)*1100+ex*900,ry:(1-p)*25+Math.sin(lt*1.2)*2,rx:(1-p)*-10});
+    const lines=['Votre Nom','8125 NW 67th Street','Miami, FL 33166','United States'];
+    $('addrLines').innerHTML=lines.map((l,i)=>{const k=P(lt,.9+i*.22,.3);
+      return `<div style="opacity:${k};transform:translateX(${(1-eOut(k))*30}px);${i===0?'color:#FF5500;':''}">${l}</div>`}).join('');
+    const pressed=lt>1.9&&lt<2.05, copied=lt>=2.0;
+    $('copyBtn').style.background=copied?'#25B66B':'#0D2B80';
+    $('copyBtn').style.transform=pressed?'scale(.95)':'scale(1)';
+    $('copyTxt').textContent=copied?'Adresse copiée ✓':'Copier';
+    CH.forEach((c,i)=>{const a=1.5+i*.15;const p2=eBack(P(lt,a,.5));T('chip'+i,{s:Math.max(.001,p2),o:P(lt,a,.1)*(1-ex)})});
+    $('langs').textContent='';
+  }
+  // ---------- S6 ----------
+  if(cur===5){const lt=t-B[5];
+    [0,1,2].forEach(i=>{const k=((lt-i*.6)%1.8+1.8)%1.8/1.8;T('ring'+i,{s:.5+k*1.6,o:(1-k)*.6})});
+    const lp=eOut5(P(lt,.1,.8));
+    T('bigLogo',{s:.6+.4*lp,o:lp,blur:(1-lp)*14,y:(1-lp)*40});
+    line('c1',lt,.7);line('c2',lt,.9);
+    const ct=eBack(P(lt,1.4,.6));
+    T('cta',{s:Math.max(.001,ct)*(1+.025*Math.sin(Math.max(0,lt-2)*6)),o:P(lt,1.4,.15)});
+    T('ct1',{x:(1-eOut5(P(lt,1.7,.6)))*-900,o:P(lt,1.7,.1)});
+    T('ct2',{x:(1-eOut5(P(lt,1.9,.6)))*900,o:P(lt,1.9,.1)});
+    T('tag',{o:eOut(P(lt,2.5,.7)),y:(1-eOut(P(lt,2.5,.7)))*20});
+    // end fade
+    $('stage').style.opacity=1-P(lt,4.65,.35);
+  } else $('stage').style.opacity=1;
+};
+function fit(){document.querySelectorAll('.mask span').forEach(sp=>{sp.style.display='inline-block';sp.style.fontSize=sp.dataset.fs||(sp.dataset.fs=parseFloat(getComputedStyle(sp).fontSize));sp.style.fontSize=sp.dataset.fs+'px';
+  const w=sp.getBoundingClientRect().width;const max=960;if(w>max)sp.style.fontSize=(sp.dataset.fs*max/w)+'px';sp.style.display='block'})}
+window.fit=fit;document.fonts.ready.then(()=>{fit();render(0)});
+render(0);
+</script>
+</body></html>
