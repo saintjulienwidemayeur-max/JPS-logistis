@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Affiches Instagram 4:5 — Freda Tech × JP's Logistics</title>
+<link rel="stylesheet" href="../v2/fonts/fonts.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden}
+.poster{position:relative;width:1080px;height:1350px;overflow:hidden;font-family:'Inter',sans-serif;color:#0B1B3F;background:#F3F6FC}
+.abs{position:absolute}
+.h{font-weight:800;letter-spacing:-.035em;line-height:1}
+.blue{color:#034BAA}
+.pill{display:flex;align-items:center;gap:16px;border-radius:999px;font-weight:700}
+.tile{display:flex;align-items:center;justify-content:center;flex:none}
+.ic{fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.shadow{box-shadow:0 40px 80px rgba(11,27,63,.20),0 10px 24px rgba(11,27,63,.10)}
+.dev{position:absolute;background:#0e1424}
+.scr{position:relative;overflow:hidden;background:#fff}
+.scr img{display:block}
+.glare{position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 38%)}
+.aur{position:absolute;border-radius:50%}
+.dots{position:absolute;inset:-40px;background-image:radial-gradient(rgba(3,75,170,.2) 2px,transparent 2.5px);background-size:34px 34px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,#000,transparent 75%)}
+.blob{position:absolute;border-radius:50%;background:#034BAA}
+.notif{display:flex;gap:16px;align-items:flex-start;border-radius:30px;padding:20px 22px;background:rgba(255,255,255,.96);box-shadow:0 24px 50px rgba(11,27,63,.25)}
+.notif .ap{width:66px;height:66px;border-radius:18px;background:#0D2B80;display:flex;align-items:center;justify-content:center;flex:none}
+.foot{position:absolute;left:40px;top:1222px;width:1000px;height:92px;border-radius:46px;background:#fff;display:flex;align-items:center;padding:0 12px 0 14px;gap:14px}
+.foot .ph{display:flex;align-items:center;gap:12px;font-size:30px;font-weight:800;color:#0B1B3F}
+.foot .sub{margin-left:auto;font-size:20px;font-weight:600;color:#5B6479;text-align:right;line-height:1.3;padding-right:16px}
+</style></head>
+<body>
+<!-- shared pieces are injected by the script below -->
+<div class="poster" id="P"></div>
+<script>
+const IC={
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="2.6"/><path d="M12 7v7M9 11l3 3 3-3M10.5 18.5h3"/>',
+ server:'<rect x="3" y="3" width="18" height="7" rx="1.6"/><rect x="3" y="14" width="18" height="7" rx="1.6"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/>',
+ box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+ plane:'<path d="M2.5 13.5l7-1.5 5-8.5h2.5l-2 8.5 5-.8 1.5-2.2h1.8l-1 3.5 1 3.5h-1.8L20 13.8l-5-.8 2 8.5h-2.5l-5-8.5-7-1.5z"/>',
+ pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
+ bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3.5 7l8.5 6 8.5-6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-6.5 8-6.5s8 2.3 8 6.5"/>',
+ call:'<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
+ home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+ ship:'<path d="M3 15h18l-2.5 5h-13zM6 15V9h12v6M9 9V5h6v4"/>',
+ chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/>',
+ bolt:'<path d="M13 2L4.5 13.5h6.5L10 22l8.5-11.5H12z"/>'};
+const svg=(k,s)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" class="ic">${IC[k]}</svg>`;
+const tile=(k,c,s=64)=>`<div class="tile" style="width:${s}px;height:${s}px;border-radius:50%;background:${c}">${svg(k,s*.52)}</div>`;
+const V2='../v2/img/', V4='../v4/img/';
+const p=+(new URLSearchParams(location.search).get('p')||1);
+const dark=p===3;
+let seed=5+p;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+function bg(){let h='';
+  if(dark) h+=`<div class="abs" style="inset:0;background:radial-gradient(circle at 50% 28%,#1360D6 0%,#034BAA 45%,#022C6B 100%)"></div>`;
+  else h+=`<div class="aur" style="left:-380px;top:-300px;width:1200px;height:1200px;background:radial-gradient(closest-side,rgba(3,75,170,.28),transparent)"></div>
+   <div class="aur" style="left:420px;top:380px;width:1000px;height:1000px;background:radial-gradient(closest-side,rgba(126,200,255,.55),transparent)"></div>
+   <div class="aur" style="left:-260px;top:800px;width:900px;height:900px;background:radial-gradient(closest-side,rgba(255,138,61,.26),transparent)"></div><div class="dots"></div>`;
+  for(let i=0;i<12;i++){const s=20+rnd()*110;h+=`<div class="blob" style="left:${rnd()*1080-s/2}px;top:${rnd()*1350-s/2}px;width:${s}px;height:${s}px;opacity:${(dark?.10:.06)+rnd()*.1};${rnd()<.5?`filter:blur(${6+rnd()*8}px);`:''}${dark?'background:#fff':''}"></div>`}
+  return h}
+function header(tag){const sfx=dark?'-white':'';return `
+  <div class="abs" style="left:44px;top:44px;display:flex;align-items:center;gap:14px">
+    <img src="${V2}freda-mark${sfx}.png" style="width:62px"><div><img src="${V2}freda-word${sfx}.png" style="width:220px;display:block"><img src="${V2}freda-group${sfx}.png" style="width:93px;display:block;margin:5px 0 0 128px"></div></div>
+  <div class="abs pill" style="right:44px;top:52px;height:56px;padding:0 22px;background:${dark?'rgba(255,255,255,.14)':'#fff'};font-size:20px;letter-spacing:.14em;color:${dark?'#fff':'#034BAA'}"><span style="width:11px;height:11px;border-radius:50%;background:#FF5500"></span>${tag}</div>`}
+function footer(){return `<div class="foot shadow">
+   ${tile('call','#034BAA',66)}<div class="ph">+1 (774) 458-5835</div>
+   <div class="tile" style="width:66px;height:66px;border-radius:50%;margin-left:8px"><img src="${V2}whatsapp.png" style="width:66px"></div><div class="ph" style="font-size:24px;color:#1a9e4b">WhatsApp</div>
+   <div class="sub"><b style="color:#0B1B3F">Freda Tech</b><br>filiale de Freda Pay LLC</div></div>`}
+function headline(a,b,top=150,fs=92,col2=null){return `<div class="abs h" style="top:${top}px;width:1080px;text-align:center;font-size:${fs}px;${dark?'color:#fff':''}">${a}<br><span style="color:${col2||(dark?'#9FD3FF':'#034BAA')}">${b}</span></div>`}
+function laptop(x,y,w,img,pos=0){const sw=w-32, sh=Math.round(sw*900/1440);return `<div class="abs" style="left:${x}px;top:${y}px;width:${w}px">
+  <div class="dev shadow" style="position:relative;width:${w}px;border-radius:22px 22px 6px 6px;padding:16px 16px 20px"><div class="scr" style="width:${sw}px;height:${sh}px;border-radius:6px"><img src="${img}" style="width:${sw}px;margin-top:${-pos}px"><div class="glare"></div></div></div>
+  <div style="margin-left:-${w*.07}px;width:${w*1.14}px;height:26px;border-radius:0 0 26px 26px;background:linear-gradient(#dfe5f0,#a9b4c9);box-shadow:0 26px 50px rgba(11,27,63,.25)"></div></div>`}
+function phone(x,y,w,img,r=0,pos=0){const sw=w-24, sh=Math.round(sw*844/390);return `<div class="abs" style="left:${x}px;top:${y}px;transform:rotate(${r}deg)">
+  <div class="dev shadow" style="position:relative;width:${w}px;border-radius:${w*.17}px;padding:12px"><div class="scr" style="width:${sw}px;height:${sh}px;border-radius:${w*.14}px"><img src="${img}" style="width:${sw}px;margin-top:${-pos}px"><div class="glare"></div>
+  <div style="position:absolute;left:${sw/2-45}px;top:10px;width:90px;height:24px;border-radius:12px;background:#0e1424"></div></div></div></div>`}
+const notif=(x,y,w,body)=>`<div class="abs notif" style="left:${x}px;top:${y}px;width:${w}px"><div class="ap"><img src="../v3/img/jps-logo-white.png" style="width:52px"></div><div style="flex:1"><div style="font-size:20px;font-weight:700;color:#5B6479;display:flex;justify-content:space-between"><span>JP's Logistics &amp; More</span><span style="font-weight:500">maintenant</span></div><div style="font-size:24px;font-weight:600;line-height:1.25;margin-top:4px">${body}</div></div></div>`;
+
+let H=bg();
+if(p===1){
+  H+=header('NOUVEAU PROJET');
+  H+=headline('Nouveau projet','livré.',150,96);
+  H+=`<div class="abs" style="top:352px;width:1080px;text-align:center;font-size:30px;font-weight:600;color:#5B6479">Site web &amp; app mobile pour <b style="color:#0B1B3F">JP's Logistics &amp; More</b></div>`;
+  H+=laptop(60,500,760,V4+'desk-full.png');
+  H+=phone(765,560,270,V4+'mob-full.png',4);
+  H+=`<img class="abs" src="${V2}site0.png" style="left:520px;top:420px;width:470px;transform:rotate(-9deg);filter:drop-shadow(0 34px 30px rgba(11,27,63,.35))">`;
+  H+=`<div class="abs shadow" style="left:60px;top:1000px;width:330px;height:150px;border-radius:30px;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${V2}jps-logo.png" style="width:270px"></div>`;
+  H+=`<div class="abs" style="left:420px;top:1005px;display:flex;flex-direction:column;gap:14px">
+     <div class="pill shadow" style="height:66px;padding:0 22px 0 8px;background:#fff;font-size:24px">${tile('box','#FF5500',50)}Suivi de colis en temps réel</div>
+     <div class="pill shadow" style="height:66px;padding:0 22px 0 8px;background:#fff;font-size:24px">${tile('user','#034BAA',50)}Espace client &amp; notifications</div></div>`;
+  H+=footer();
+}
+if(p===2){
+  H+=header('ÉTUDE DE CAS');
+  H+=headline('Suivi de colis','en temps réel.',150,96);
+  H+=phone(60,400,380,V4+'track-m2.png',-3);
+  H+=notif(40,355,560,'Votre colis <b>JPS-2026-48213</b> est maintenant : arrivé en Haïti.');
+  const TL=[['box','Reçu à Miami','Dépôt · Miami, FL','#034BAA',1],['plane','En transit','Fret & douane','#1E88E5',1],['pin','Arrivé en Haïti','Pétion-Ville','#FF5500',2],['check','Prêt pour retrait','11, Rue Rogé','#C9D2E3',0]];
+  H+=`<div class="abs" style="left:552px;top:520px;width:8px;height:480px;border-radius:4px;background:#DDE3F0"></div><div class="abs" style="left:552px;top:520px;width:8px;height:320px;border-radius:4px;background:linear-gradient(#034BAA,#FF5500)"></div>`;
+  TL.forEach((s,i)=>{H+=`<div class="abs" style="left:500px;top:${470+i*160}px;display:flex;align-items:center;gap:20px">
+    <div style="position:relative;width:112px;height:112px">${s[4]===2?`<div style="position:absolute;inset:-14px;border-radius:50%;border:5px solid #FF5500;opacity:.35"></div>`:''}<div class="tile" style="position:absolute;inset:0;border-radius:50%;background:${s[3]};${s[4]?`box-shadow:0 14px 30px ${s[3]}66`:''}">${svg(s[0],54)}</div></div>
+    <div><div style="font-size:32px;font-weight:800;letter-spacing:-.02em;${s[4]?'':'color:#9AA3B8'}">${s[1]}</div><div style="font-size:22px;font-weight:600;color:#5B6479;margin-top:4px">${s[2]}</div></div></div>`});
+  H+=`<div class="abs shadow" style="left:500px;top:1100px;width:540px;height:96px;border-radius:30px;background:#fff">
+     <div class="abs" style="left:26px;top:18px;font-size:18px;font-weight:800;letter-spacing:.1em;color:#034BAA">MIAMI</div><div class="abs" style="right:26px;top:18px;font-size:18px;font-weight:800;letter-spacing:.1em;color:#FF5500">PÉTION-VILLE</div>
+     <div class="abs" style="left:26px;top:60px;width:488px;height:7px;border-radius:4px;background:repeating-linear-gradient(90deg,#DDE3F0 0 12px,transparent 12px 20px)"></div>
+     <div class="abs" style="left:26px;top:60px;width:330px;height:7px;border-radius:4px;background:linear-gradient(90deg,#034BAA,#FF5500)"></div>
+     <div class="abs tile" style="left:330px;top:42px;width:44px;height:44px;border-radius:50%;background:#FF5500">${svg('plane',26)}</div></div>`;
+  H+=`<div class="abs pill shadow" style="display:none;left:60px;top:1130px;height:64px;padding:0 20px 0 8px;background:#0B1B3F;color:#fff;font-size:22px">${tile('bell','#6C4CF5',48)}Push + e-mail à chaque étape</div>`;
+  H+=footer();
+}
+if(p===3){
+  H+=header('FREDA TECH');
+  H+=headline('Freda Tech crée','vos outils digitaux.',150,92);
+  // exploded 3D view of the real site sections
+  const SL=[['chat','Contact',3990,4704],['ship','Services',2880,3520],['box','Fret maritime',1000,1700],['bolt','Suivi de colis',-1,0],['home','Accueil',0,900]];
+  let iso='';SL.forEach((l,i)=>{const w=540, h=l[2]<0?Math.round(531*w/832):Math.round((l[3]-l[2])*w/1440);
+    const bgi=l[2]<0?`url(${V4}track-d3.png) 0 0/${w}px auto`:`url(${V4}desk-full.png) 0 ${-l[2]*w/1440}px/${w}px auto`;
+    iso+=`<div class="abs" style="left:0;top:${(360-h)/2}px;width:${w}px;height:${h}px;transform-style:preserve-3d;transform:translateZ(${i*92}px)">
+      <div class="abs" style="inset:0;border-radius:12px;background:#fff ${bgi} no-repeat;box-shadow:0 0 0 3px rgba(255,255,255,.9),0 30px 60px rgba(0,10,40,.45)"></div>
+      <div class="abs" style="left:0;top:100%;width:100%;height:14px;background:linear-gradient(#c7d0e2,#93a1bd);transform-origin:50% 0;transform:rotateX(-90deg)"></div>
+      <div class="abs" style="left:100%;top:0;width:14px;height:100%;background:linear-gradient(90deg,#aeb9cf,#7f8cab);transform-origin:0 50%;transform:rotateY(90deg)"></div></div>`});
+  H+=`<div class="abs" style="left:380px;top:800px;width:0;height:0;perspective:2400px;perspective-origin:0 -200px">
+       <div class="abs" style="left:-270px;top:-180px;width:540px;height:360px;transform-style:preserve-3d;transform:rotateX(56deg) rotateZ(-34deg)">${iso}</div></div>`;
+  // labels for the layers (positioned to match the stack)
+  const lbl=[['home','Accueil','#034BAA',600],['bolt','Suivi de colis','#FF5500',672],['box','Fret maritime','#0D2B80',744],['ship','Services','#1E88E5',816],['chat','Contact &amp; WhatsApp','#25B66B',888]];
+  lbl.forEach(l=>{H+=`<div class="abs pill shadow" style="left:690px;top:${l[3]}px;height:60px;padding:0 20px 0 6px;background:#fff;font-size:22px">${tile(l[0],l[2],48)}${l[1]}</div>`});
+  const SV=[['globe','Sites web','#034BAA'],['phone','Apps mobiles','#FF5500'],['server','Systèmes informatiques','#6C4CF5']];
+  SV.forEach((v,i)=>{H+=`<div class="abs shadow" style="left:${40+i*340}px;top:1010px;width:320px;height:180px;border-radius:32px;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 26px;gap:14px">
+     <div class="tile" style="width:72px;height:72px;border-radius:22px;background:${v[2]}">${svg(v[0],40)}</div><div style="font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1">${v[1]}</div></div>`});
+  H+=footer();
+}
+document.getElementById('P').innerHTML=H;
+</script>
+</body></html>
