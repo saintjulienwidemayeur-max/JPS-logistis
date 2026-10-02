@@ -1542,7 +1542,7 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
       const r = await fetch(AUTH_FN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': SB_PUBLISHABLE_KEY },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ ...body, lang: getLang() })
       });
       let data = {};
       try { data = await r.json(); } catch(e){}
@@ -2301,6 +2301,15 @@ ${_}`}var A=class extends Error{constructor({message:e,code:t,cause:s,name:n}){v
     okEl.textContent = t('Profil mis à jour.');
     okEl.classList.remove('hidden');
   });
+
+  /* ---- Remember the client's language (e-mails and notifications follow it) ---- */
+  function saveClientLang(){
+    const cs = safeRead(CLIENT_SESSION_KEY, null);
+    if (!cs) return;
+    try { sb.from('clients').update({ lang: getLang() }).eq('id', cs.id).then(() => {}, () => {}); } catch(e){}
+  }
+  window.addEventListener('jps-lang', saveClientLang);
+  window.addEventListener('jps-login', saveClientLang);
 
   /* ---- re-render dynamic content when the language changes ---- */
   window.addEventListener('jps-lang', () => {

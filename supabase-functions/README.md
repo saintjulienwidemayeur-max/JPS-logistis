@@ -98,3 +98,9 @@ All e-mails share one design (logo header, orange accent, navy footer). The logo
 loaded from `SITE_URL/logo.png`. If your site is not at `https://jpslogistics.me`,
 add a secret `SITE_URL` (e.g. `https://your-site.onrender.com`) so the logo and the
 "Suivre mon colis" button point to the right place.
+
+### Languages (FR / EN / ES)
+The site has a language switcher (top bar and client/admin pages). The chosen
+language is saved on the client (`clients.lang`, added by section 11 of the SQL
+file) so OTP, welcome, password and shipment e-mails and push notifications are
+sent in that language. Re-deploy `client-auth` and `send-notifications`.
