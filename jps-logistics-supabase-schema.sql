@@ -373,3 +373,6 @@ revoke execute on function public.phone_in_use(text)                          fr
 grant  execute on function public.client_signup(text, text, text, text, text) to service_role;
 grant  execute on function public.client_reset_password(text, text)           to service_role;
 grant  execute on function public.phone_in_use(text)                          to service_role;
+
+-- 11) Preferred language of each client (fr / en / es): used for e-mails and push
+alter table public.clients add column if not exists lang text not null default 'fr';

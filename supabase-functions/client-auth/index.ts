@@ -48,14 +48,22 @@ function newCode() {
 const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://jpslogistics.me").replace(/\/$/, "");
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
-function layout(title: string, inner: string, cta?: { label: string; url: string }, preheader = ""): string {
+type Lang = "fr" | "en" | "es";
+const asLang = (l: unknown): Lang => (l === "en" || l === "es" ? l : "fr");
+const FOOTNOTE: Record<Lang, string> = {
+  fr: "Vous recevez cet e-mail car vous avez un compte chez JP's Logistics &amp; More LLC.",
+  en: "You are receiving this email because you have an account with JP's Logistics &amp; More LLC.",
+  es: "Usted recibe este correo porque tiene una cuenta en JP's Logistics &amp; More LLC.",
+};
+
+function layout(title: string, inner: string, cta?: { label: string; url: string }, preheader = "", lang: Lang = "fr"): string {
   const button = cta
     ? `<tr><td align="center" style="background:#ffffff;padding:6px 28px 30px;">
          <a href="${cta.url}" style="display:inline-block;background:#FF5500;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:999px;font-family:${FONT};">${cta.label}</a>
        </td></tr>`
     : `<tr><td style="background:#ffffff;height:22px;line-height:22px;font-size:0;">&nbsp;</td></tr>`;
   return `<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
+<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
 <body style="margin:0;padding:0;background:#EEF1F8;">
 <span style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;">${preheader}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EEF1F8;padding:24px 12px;">
@@ -74,10 +82,41 @@ function layout(title: string, inner: string, cta?: { label: string; url: string
       8125 NW 67th St, Miami, FL 33166 &middot; +1 (786) 424-8025<br>
       <a href="mailto:contact@jpslogistics.me" style="color:#C9D4F5;">contact@jpslogistics.me</a>
     </td></tr>
-    <tr><td align="center" style="padding:14px;font-family:${FONT};color:#8A93A8;font-size:11px;">Vous recevez cet e-mail car vous avez un compte chez JP's Logistics &amp; More LLC.</td></tr>
+    <tr><td align="center" style="padding:14px;font-family:${FONT};color:#8A93A8;font-size:11px;">${FOOTNOTE[lang]}</td></tr>
   </table>
 </td></tr></table></body></html>`;
 }
+
+// ---------- E-mail copy (FR / EN / ES) ----------
+const M = {
+  otpSignup: {
+    fr: { subject: "Votre code de vérification — JP's Logistics & More LLC", title: "Vérifiez votre e-mail", intro: "Merci de vous inscrire chez JP's Logistics &amp; More LLC. Entrez ce code pour finaliser la création de votre compte :", pre: "Votre code : {code}" },
+    en: { subject: "Your verification code — JP's Logistics & More LLC", title: "Verify your email", intro: "Thanks for signing up with JP's Logistics &amp; More LLC. Enter this code to finish creating your account:", pre: "Your code: {code}" },
+    es: { subject: "Su código de verificación — JP's Logistics & More LLC", title: "Verifique su correo", intro: "Gracias por registrarse en JP's Logistics &amp; More LLC. Ingrese este código para terminar de crear su cuenta:", pre: "Su código: {code}" },
+  },
+  otpReset: {
+    fr: { subject: "Réinitialisation de votre mot de passe — JP's Logistics & More LLC", title: "Mot de passe oublié ?", intro: "Pas de souci. Entrez ce code pour choisir un nouveau mot de passe :", pre: "Votre code : {code}" },
+    en: { subject: "Reset your password — JP's Logistics & More LLC", title: "Forgot your password?", intro: "No worries. Enter this code to choose a new password:", pre: "Your code: {code}" },
+    es: { subject: "Restablezca su contraseña — JP's Logistics & More LLC", title: "¿Olvidó su contraseña?", intro: "No se preocupe. Ingrese este código para elegir una nueva contraseña:", pre: "Su código: {code}" },
+  },
+  otpNote: {
+    fr: "Ce code expire dans {m} minutes.<br>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.",
+    en: "This code expires in {m} minutes.<br>If you didn't request this, simply ignore this email.",
+    es: "Este código vence en {m} minutos.<br>Si usted no lo solicitó, simplemente ignore este correo.",
+  },
+  welcome: {
+    fr: { subject: "Bienvenue chez JP's Logistics & More LLC", title: "Bienvenue, {name} !", p1: "Votre compte est prêt. Voici votre adresse à Miami pour tous vos achats :", box: "Votre numéro de boîte", p2: "Dès que vos colis arrivent, nous vous prévenons par e-mail et par notification.", cta: "Accéder à mon espace", pre: "Votre compte JP's Logistics est prêt." },
+    en: { subject: "Welcome to JP's Logistics & More LLC", title: "Welcome, {name}!", p1: "Your account is ready. Here is your Miami address for all your purchases:", box: "Your box number", p2: "As soon as your packages arrive, we'll let you know by email and notification.", cta: "Go to my area", pre: "Your JP's Logistics account is ready." },
+    es: { subject: "Bienvenido a JP's Logistics & More LLC", title: "¡Bienvenido/a, {name}!", p1: "Su cuenta está lista. Esta es su dirección en Miami para todas sus compras:", box: "Su número de casilla", p2: "En cuanto lleguen sus paquetes, le avisaremos por correo y por notificación.", cta: "Ir a mi área", pre: "Su cuenta de JP's Logistics está lista." },
+  },
+  pwChanged: {
+    fr: { subject: "Votre mot de passe a été modifié — JP's Logistics & More LLC", title: "Mot de passe modifié", p1: "Le mot de passe de votre compte vient d'être modifié.", p2: "Si ce n'était pas vous, contactez-nous immédiatement à contact@jpslogistics.me.", cta: "Me connecter", pre: "Votre mot de passe a été modifié." },
+    en: { subject: "Your password has been changed — JP's Logistics & More LLC", title: "Password changed", p1: "The password for your account has just been changed.", p2: "If this wasn't you, contact us immediately at contact@jpslogistics.me.", cta: "Log in", pre: "Your password has been changed." },
+    es: { subject: "Su contraseña ha sido modificada — JP's Logistics & More LLC", title: "Contraseña modificada", p1: "La contraseña de su cuenta acaba de ser modificada.", p2: "Si no fue usted, contáctenos de inmediato en contact@jpslogistics.me.", cta: "Iniciar sesión", pre: "Su contraseña ha sido modificada." },
+  },
+};
+const fill = (text: string, vars: Record<string, string | number>) =>
+  text.replace(/\{(\w+)\}/g, (_m, k) => String(vars[k] ?? ""));
 
 async function sendMail(to: { email: string; name?: string }, subject: string, html: string) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -114,6 +153,7 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch (_e) { return json({ error: "BAD_REQUEST" }, 400); }
   const action = body?.action;
+  const lang = asLang(body?.lang);
   const email = String(body?.email ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: "INVALID_EMAIL" }, 400);
 
@@ -154,21 +194,21 @@ Deno.serve(async (req) => {
       });
 
       const isSignup = purpose === "signup";
+      const c = (isSignup ? M.otpSignup : M.otpReset)[lang];
       const codeBox = `<table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:18px auto;"><tr>
           <td style="background:#EEF3FF;border:2px dashed #0D2B80;border-radius:14px;padding:14px 26px;font-size:34px;letter-spacing:10px;font-weight:bold;color:#0D2B80;font-family:'Courier New',monospace;">${code}</td>
         </tr></table>`;
       await sendMail(
         { email, name: existing?.name },
-        isSignup ? "Votre code de vérification — JP's Logistics & More LLC" : "Réinitialisation de votre mot de passe — JP's Logistics & More LLC",
+        c.subject,
         layout(
-          isSignup ? "Vérifiez votre e-mail" : "Mot de passe oublié ?",
-          `<p style="margin:0 0 6px;">${isSignup
-              ? "Merci de vous inscrire chez JP's Logistics &amp; More LLC. Entrez ce code pour finaliser la création de votre compte :"
-              : "Pas de souci. Entrez ce code pour choisir un nouveau mot de passe :"}</p>
+          c.title,
+          `<p style="margin:0 0 6px;">${c.intro}</p>
            ${codeBox}
-           <p style="margin:0;color:#6B7490;font-size:13px;text-align:center;">Ce code expire dans ${OTP_TTL_MINUTES} minutes.<br>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.</p>`,
+           <p style="margin:0;color:#6B7490;font-size:13px;text-align:center;">${fill(M.otpNote[lang], { m: OTP_TTL_MINUTES })}</p>`,
           undefined,
-          `Votre code : ${code}`,
+          fill(c.pre, { code }),
+          lang,
         ),
       );
       return json({ ok: true });
@@ -196,22 +236,25 @@ Deno.serve(async (req) => {
       const profile = data && data[0];
       if (!profile) return json({ error: "SIGNUP_FAILED" }, 500);
 
-      // Welcome e-mail (best effort)
+      // Remember the client's language (used for shipment e-mails / push) and send the welcome e-mail (best effort)
+      try { await supabase.from("clients").update({ lang }).eq("id", profile.id); } catch (_e) { /* column may not exist yet */ }
       try {
+        const w = M.welcome[lang];
         await sendMail(
           { email, name: profile.name },
-          "Bienvenue chez JP's Logistics & More LLC",
+          w.subject,
           layout(
-            `Bienvenue, ${String(profile.name).split(" ")[0]} !`,
-            `<p style="margin:0 0 14px;">Votre compte est prêt. Voici votre adresse à Miami pour tous vos achats :</p>
+            fill(w.title, { name: String(profile.name).split(" ")[0] }),
+            `<p style="margin:0 0 14px;">${w.p1}</p>
              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F7FF;border-radius:14px;"><tr><td style="padding:16px 18px;">
-               <div style="font-size:12px;color:#6B7490;text-transform:uppercase;letter-spacing:1px;">Votre numéro de boîte</div>
+               <div style="font-size:12px;color:#6B7490;text-transform:uppercase;letter-spacing:1px;">${w.box}</div>
                <div style="font-size:24px;font-weight:bold;color:#0D2B80;margin:2px 0 10px;">${profile.box_number}</div>
                <div style="font-size:14px;color:#1B2540;">${profile.name}<br>${profile.box_number}<br>8125 NW 67th St<br>Miami, FL 33166</div>
              </td></tr></table>
-             <p style="margin:14px 0 0;">Dès que vos colis arrivent, nous vous prévenons par e-mail et par notification.</p>`,
-            { label: "Accéder à mon espace", url: SITE_URL },
-            "Votre compte JP's Logistics est prêt.",
+             <p style="margin:14px 0 0;">${w.p2}</p>`,
+            { label: w.cta, url: SITE_URL },
+            w.pre,
+            lang,
           ),
         );
       } catch (_e) { /* ignore */ }
@@ -229,16 +272,19 @@ Deno.serve(async (req) => {
         p_email: email, p_new_password: String(new_password),
       });
       if (error || !ok) return json({ error: "RESET_FAILED" }, 500);
+      try { await supabase.from("clients").update({ lang }).eq("email", email); } catch (_e) { /* ignore */ }
       try {
+        const m = M.pwChanged[lang];
         await sendMail(
           { email },
-          "Votre mot de passe a été modifié — JP's Logistics & More LLC",
+          m.subject,
           layout(
-            "Mot de passe modifié",
-            `<p style="margin:0 0 10px;">Le mot de passe de votre compte vient d'être modifié.</p>
-             <p style="margin:0;color:#6B7490;font-size:13px;">Si ce n'était pas vous, contactez-nous immédiatement à contact@jpslogistics.me.</p>`,
-            { label: "Me connecter", url: SITE_URL },
-            "Votre mot de passe a été modifié.",
+            m.title,
+            `<p style="margin:0 0 10px;">${m.p1}</p>
+             <p style="margin:0;color:#6B7490;font-size:13px;">${m.p2}</p>`,
+            { label: m.cta, url: SITE_URL },
+            m.pre,
+            lang,
           ),
         );
       } catch (_e) { /* ignore */ }
