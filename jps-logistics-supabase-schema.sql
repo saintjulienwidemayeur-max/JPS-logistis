@@ -396,3 +396,99 @@ end;
 $$;
 revoke execute on function public.delete_shipment(text, text, uuid) from public;
 grant  execute on function public.delete_shipment(text, text, uuid) to anon, authenticated;
+
+
+-- ============================================================
+-- 13) PRE-ALERTS ("annoncer un colis")
+-- The customer announces an online order BEFORE it reaches the Miami
+-- warehouse: only the minimum JP's needs (carrier, final tracking number,
+-- store, what is inside, value, Air or Sea). The warehouse app reads this
+-- table with the service_role key; when the parcel is scanned, the tracking
+-- number matches the customer at once. Run this block once in the SQL Editor.
+-- Same trust model as the rest of the customer area (the client id is the
+-- key) but stricter: the table itself has NO policy, everything goes
+-- through the functions below.
+-- ============================================================
+create table if not exists public.prealerts (
+  id              uuid primary key default gen_random_uuid(),
+  client_id       uuid not null references public.clients(id) on delete cascade,
+  carrier         text not null,
+  tracking_number text not null,
+  store           text not null,
+  contents        text not null,
+  declared_value  numeric(10,2) not null check (declared_value > 0),
+  ship_choice     text check (ship_choice in ('Air','Ocean')),
+  wait            boolean not null default false,   -- "wait for my other orders" (held up to 3 shipments)
+  restricted      boolean not null default false,   -- battery, liquid, aerosol, perfume...
+  status          text not null default 'expected' check (status in ('expected','received','cancelled')),
+  affirmed_at     timestamptz not null default now(),
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create unique index if not exists prealerts_tracking_active on public.prealerts (tracking_number) where status <> 'cancelled';
+create index if not exists prealerts_client on public.prealerts (client_id, created_at desc);
+alter table public.prealerts enable row level security;
+-- No policies on purpose: only the functions below and the service_role can touch it.
+
+create or replace function public.client_add_prealert(
+  p_client_id uuid, p_carrier text, p_tracking text, p_store text, p_contents text,
+  p_value numeric, p_ship text, p_wait boolean, p_restricted boolean
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  v_track text := upper(regexp_replace(coalesce(p_tracking, ''), '[\s-]', '', 'g'));
+  v_id uuid;
+begin
+  if not exists (select 1 from public.clients c where c.id = p_client_id) then raise exception 'NOT_AUTHORIZED'; end if;
+  if v_track !~ '^[A-Z0-9]{8,40}$' then raise exception 'BAD_TRACKING'; end if;
+  if length(btrim(coalesce(p_carrier, ''))) = 0 or length(btrim(coalesce(p_store, ''))) = 0 or length(btrim(coalesce(p_contents, ''))) = 0 then raise exception 'MISSING_FIELDS'; end if;
+  if p_value is null or p_value <= 0 or p_value > 1000000 then raise exception 'BAD_VALUE'; end if;
+  if p_ship is not null and p_ship not in ('Air','Ocean') then raise exception 'BAD_SHIP'; end if;
+  begin
+    insert into public.prealerts (client_id, carrier, tracking_number, store, contents, declared_value, ship_choice, wait, restricted)
+    values (p_client_id, left(btrim(p_carrier), 40), v_track, left(btrim(p_store), 80), left(btrim(p_contents), 160), round(p_value, 2), p_ship, coalesce(p_wait, false), coalesce(p_restricted, false))
+    returning id into v_id;
+  exception when unique_violation then
+    raise exception 'TRACKING_TAKEN';
+  end;
+  return v_id;
+end;
+$$;
+
+create or replace function public.client_list_prealerts(p_client_id uuid)
+returns table(id uuid, carrier text, tracking_number text, store text, contents text, declared_value numeric, ship_choice text, wait boolean, restricted boolean, status text, created_at timestamptz)
+language sql security definer set search_path = public as $$
+  select p.id, p.carrier, p.tracking_number, p.store, p.contents, p.declared_value, p.ship_choice, p.wait, p.restricted, p.status, p.created_at
+  from public.prealerts p where p.client_id = p_client_id and p.status <> 'cancelled' order by p.created_at desc limit 100;
+$$;
+
+-- Change the shipping choice (Air / Sea / wait) while the parcel has not arrived.
+create or replace function public.client_update_prealert(p_client_id uuid, p_id uuid, p_ship text, p_wait boolean)
+returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  if p_ship is not null and p_ship not in ('Air','Ocean') then raise exception 'BAD_SHIP'; end if;
+  update public.prealerts set ship_choice = p_ship, wait = coalesce(p_wait, false), updated_at = now()
+  where id = p_id and client_id = p_client_id and status = 'expected';
+  return found;
+end;
+$$;
+
+create or replace function public.client_cancel_prealert(p_client_id uuid, p_id uuid)
+returns boolean
+language plpgsql security definer set search_path = public as $$
+begin
+  update public.prealerts set status = 'cancelled', updated_at = now()
+  where id = p_id and client_id = p_client_id and status = 'expected';
+  return found;
+end;
+$$;
+
+revoke execute on function public.client_add_prealert(uuid, text, text, text, text, numeric, text, boolean, boolean) from public;
+revoke execute on function public.client_list_prealerts(uuid)                  from public;
+revoke execute on function public.client_update_prealert(uuid, uuid, text, boolean) from public;
+revoke execute on function public.client_cancel_prealert(uuid, uuid)           from public;
+grant  execute on function public.client_add_prealert(uuid, text, text, text, text, numeric, text, boolean, boolean) to anon, authenticated;
+grant  execute on function public.client_list_prealerts(uuid)                  to anon, authenticated;
+grant  execute on function public.client_update_prealert(uuid, uuid, text, boolean) to anon, authenticated;
+grant  execute on function public.client_cancel_prealert(uuid, uuid)           to anon, authenticated;
