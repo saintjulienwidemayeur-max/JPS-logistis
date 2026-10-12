@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JP's Logistics & More — 2027 (motion)</title>
+<link rel="stylesheet" href="fonts/local.css">
+<style>
+  :root{ --orange:#FF6A1A; --orange-2:#FFB347; --cyan:#5FD3FF; --T:16s; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; background:#020A2E; overflow:hidden; }
+  body{ display:flex; align-items:center; justify-content:center; font-family:Inter,system-ui,sans-serif; color:#fff; }
+  #fit{ width:1080px; height:1920px; transform-origin:center center; flex:0 0 auto; }
+  #stage{ position:relative; width:1080px; height:1920px; overflow:hidden;
+    background:
+      radial-gradient(900px 700px at 80% 12%, rgba(95,211,255,.35), transparent 60%),
+      radial-gradient(900px 800px at 0% 40%, rgba(28,85,242,.9), transparent 65%),
+      linear-gradient(180deg,#0A2AA8 0%, #1447E3 32%, #0E39C6 60%, #071E78 85%, #04103F 100%); }
+  .abs{ position:absolute; }
+  /* every animation runs once on the same 16 s timeline (delays = start time) */
+  .a{ animation-duration: var(--d,1s); animation-delay: var(--t,0s); animation-fill-mode: both; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count:1; }
+
+  /* ---- background ---- */
+  #dots{ inset:-60px; opacity:.25; background-image: radial-gradient(rgba(255,255,255,.6) 1.5px, transparent 1.7px); background-size:28px 28px;
+    -webkit-mask-image: radial-gradient(700px 800px at 55% 30%, #000, transparent 75%); mask-image: radial-gradient(700px 800px at 55% 30%, #000, transparent 75%);
+    animation: drift var(--T) linear both; }
+  @keyframes drift{ from{ transform:translate(0,0) scale(1.04);} to{ transform:translate(-40px,-60px) scale(1.1);} }
+  .orb{ width:700px; height:700px; border-radius:50%; filter:blur(40px); opacity:.55; }
+  #orb1{ left:-260px; top:1100px; background:radial-gradient(closest-side,#2E6BFF,transparent); animation: orb1 var(--T) ease-in-out both; }
+  #orb2{ right:-300px; top:-200px; background:radial-gradient(closest-side,#5FD3FF,transparent); opacity:.35; animation: orb2 var(--T) ease-in-out both; }
+  @keyframes orb1{ 0%{transform:translate(0,0)} 50%{transform:translate(160px,-220px)} 100%{transform:translate(40px,-520px)} }
+  @keyframes orb2{ 0%{transform:translate(0,0)} 100%{transform:translate(-200px,260px)} }
+  svg#waves{ left:0; top:0; width:1080px; height:1920px; opacity:.55; }
+
+  /* ---- scene 1: route Miami -> Haiti ---- */
+  #route{ left:0; top:0; width:1080px; height:1920px; }
+  #route .path{ stroke-dasharray: 1400; stroke-dashoffset:1400; animation: draw 1.6s cubic-bezier(.4,0,.2,1) .2s both, fadeRoute .8s ease 2.7s both; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @keyframes fadeRoute{ to{ opacity:.0; } }
+  .pin{ animation: pinIn .6s cubic-bezier(.2,1.6,.4,1) both, fadeRoute .8s ease 2.7s both; transform-box: fill-box; transform-origin:center; }
+  @keyframes pinIn{ from{ transform:scale(0); opacity:0 } to{ transform:scale(1); opacity:1 } }
+  .city{ font:800 30px 'Big Shoulders Display'; letter-spacing:.2em; fill:#fff; animation: up .7s ease both, fadeRoute .8s ease 2.7s both; }
+  #plane{ width:300px; left:0; top:0; offset-path: path("M 150 1450 C 260 900, 620 640, 930 560 S 1250 380, 1400 330"); offset-rotate: auto 0deg;
+    animation: fly 2.6s cubic-bezier(.45,.05,.4,1) .35s both; filter: drop-shadow(0 16px 20px rgba(0,8,50,.4)); }
+  @keyframes fly{ 0%{ offset-distance:0%; opacity:0; transform:scale(.55);} 8%{opacity:1} 70%{ transform:scale(1);} 100%{ offset-distance:100%; transform:scale(1.15); opacity:1;} }
+
+  /* ---- hero group (shrinks to make room for the months) ---- */
+  #hero{ left:0; top:0; width:1080px; height:1200px; transform-origin: 540px 40px; animation: heroShrink 1.1s cubic-bezier(.6,0,.2,1) 9s both; }
+  @keyframes heroShrink{ from{ transform:none; } to{ transform: translateY(-10px) scale(.6); } }
+  #ring{ left:60px; top:80px; width:210px; height:210px; animation: ringIn 1s cubic-bezier(.2,.9,.2,1) 1.9s both; }
+  #ring svg{ width:100%; height:100%; animation: spin 16s linear both; }
+  #ring img{ position:absolute; left:50%; top:50%; width:140px; transform:translate(-50%,-52%); }
+  @keyframes ringIn{ from{ transform:scale(.3) rotate(-90deg); opacity:0;} to{ transform:none; opacity:1;} }
+  @keyframes spin{ to{ transform: rotate(90deg); } }
+  #flex{ right:46px; top:112px; width:420px; filter: drop-shadow(0 14px 22px rgba(0,0,30,.35)); }
+  #flex.a{ animation-name: slideL; --t:2.15s; --d:.9s; }
+  @keyframes slideL{ from{ transform:translateX(140px); opacity:0;} to{ transform:none; opacity:1;} }
+  #kicker{ left:0; right:0; top:332px; text-align:center; font:700 22px Inter; letter-spacing:.5em; color:rgba(255,255,255,.85); }
+  #kicker b{ color:var(--orange-2); }
+  #kicker.a{ animation-name: kick; --t:2.6s; --d:1s; }
+  @keyframes kick{ from{ letter-spacing:1.2em; opacity:0;} to{ letter-spacing:.5em; opacity:1;} }
+
+  #year{ left:0; right:0; top:372px; height:330px; text-align:center; font:900 400px/0.82 'Big Shoulders Display'; white-space:nowrap; }
+  #year .row{ display:inline-flex; filter: drop-shadow(0 18px 30px rgba(0,10,60,.45)); }
+  .dig{ display:inline-block; background: linear-gradient(180deg,#fff 0%, #EAF3FF 45%, #8DBEFF 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .dig.a{ animation-name: digUp; --d:.9s; }
+  @keyframes digUp{ from{ transform:translateY(120px); opacity:0; clip-path: inset(0 0 100% 0);} to{ transform:none; opacity:1; clip-path: inset(0 0 0 0);} }
+  .slot{ position:relative; display:inline-block; overflow:hidden; height:340px; }
+  .slot .six, .slot .seven{ display:block; }
+  .slot .seven{ position:absolute; left:0; top:0; background: linear-gradient(180deg,#FFD08A 0%,#FF8A2A 55%,#FF5A0A 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .six.a{ animation-name: digUp, sixOut; animation-delay: 3.36s, 4.25s; animation-duration: .9s, .6s; animation-timing-function: cubic-bezier(.2,.8,.2,1), cubic-bezier(.6,0,.8,.2); }
+  @keyframes sixOut{ from{ transform:none; opacity:1;} to{ transform:translateY(110%); opacity:0;} }
+  .six-in.a{ animation-name: digUp; }
+  .seven.a{ animation-name: sevenIn; --t:4.55s; --d:.9s; animation-timing-function: cubic-bezier(.2,1.5,.35,1); }
+  @keyframes sevenIn{ from{ transform:translateY(-110%);} to{ transform:none;} }
+  #flash{ left:640px; top:420px; width:300px; height:300px; border-radius:50%; background: radial-gradient(closest-side, rgba(255,179,71,.85), transparent); opacity:0; mix-blend-mode:screen; }
+  #flash.a{ animation-name: flash; --t:4.75s; --d:1s; }
+  @keyframes flash{ 0%{opacity:0; transform:scale(.4)} 30%{opacity:1} 100%{opacity:0; transform:scale(1.6)} }
+
+  #glow{ left:20px; top:880px; width:900px; height:150px; border-radius:50%; background: radial-gradient(closest-side, rgba(95,211,255,.6), transparent); filter:blur(8px); }
+  #glow.a{ animation-name: fadeIn; --t:5.2s; --d:1.2s; }
+  #ship{ left:-20px; top:560px; width:720px; }
+  #ship.a{ animation-name: shipIn; --t:5s; --d:1.5s; }
+  @keyframes shipIn{ from{ transform:translateX(-780px); } to{ transform:none; } }
+  #ship img{ width:100%; display:block; filter: drop-shadow(0 26px 32px rgba(0,8,50,.55)); animation: bob 3s ease-in-out infinite both; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(0deg);} 50%{ transform:translateY(-7px) rotate(-.4deg);} }
+  #truck{ right:-6px; top:640px; width:430px; }
+  #truck.a{ animation-name: truckIn; --t:5.7s; --d:1.3s; animation-timing-function: cubic-bezier(.15,.85,.25,1); }
+  @keyframes truckIn{ from{ transform:translateX(520px); } 85%{ transform:translateX(-10px);} to{ transform:none; } }
+  #truck img{ width:100%; display:block; filter: drop-shadow(0 26px 32px rgba(0,8,50,.55)); }
+  .beam{ position:absolute; width:110px; height:110px; border-radius:50%; background: radial-gradient(closest-side, rgba(220,240,255,.95), rgba(95,211,255,0)); mix-blend-mode:screen; opacity:0; }
+  .beam.a{ animation-name: beam; --t:6.9s; --d:1.4s; }
+  @keyframes beam{ 0%{opacity:0; transform:scale(.4)} 35%{opacity:1; transform:scale(1.4)} 100%{opacity:.45; transform:scale(1)} }
+
+  #band{ left:60px; right:60px; top:1010px; display:flex; align-items:center; gap:22px; }
+  #medal{ width:118px; height:118px; filter: drop-shadow(0 10px 16px rgba(0,0,0,.35)); }
+  #medal.a{ animation-name: medalIn; --t:7.3s; --d:1.1s; }
+  @keyframes medalIn{ from{ transform: perspective(600px) rotateY(540deg) scale(.2); opacity:0;} to{ transform: perspective(600px) rotateY(0) scale(1); opacity:1;} }
+  #partner{ font:900 92px/.86 'Big Shoulders Display'; }
+  #partner small{ display:block; font:700 21px/1.35 Inter; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.88); margin-top:6px; }
+  #partner.a{ animation-name: wipe; --t:7.65s; --d:.9s; }
+  @keyframes wipe{ from{ clip-path: inset(0 100% 0 0); transform:translateX(-20px);} to{ clip-path: inset(0 0 0 0); transform:none;} }
+
+  /* ---- scene: services (before months) ---- */
+  #services{ left:60px; right:60px; top:1220px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  #services.a{ animation-name: fadeOutDown; --t:8.7s; --d:.5s; animation-timing-function: ease-in; }
+  .svc{ display:flex; align-items:center; gap:18px; padding:22px 24px; border-radius:24px; background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.18); }
+  .svc .ic{ width:66px; height:66px; border-radius:18px; display:grid; place-items:center; background:rgba(255,255,255,.12); flex:0 0 auto; }
+  .svc b{ display:block; font:800 34px/1 'Big Shoulders Display'; letter-spacing:.04em; text-transform:uppercase; }
+  .svc span{ font:500 19px/1.35 Inter; color:rgba(255,255,255,.8); }
+  .svc.a{ animation-name: cardIn; --d:.8s; }
+  @keyframes cardIn{ from{ transform:translateY(60px) scale(.96); opacity:0;} to{ transform:none; opacity:1;} }
+  @keyframes fadeOutDown{ from{opacity:1; transform:none} to{ opacity:0; transform:translateY(80px);} }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  @keyframes up{ from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:none} }
+
+  /* ---- scene: months ---- */
+  #months{ left:44px; right:44px; top:740px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .m{ position:relative; padding:14px 16px 10px; border-radius:20px; height:250px; background:linear-gradient(160deg,rgba(255,255,255,.15),rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.2); overflow:hidden; }
+  .m.a{ animation-name: monthIn; --d:.75s; }
+  @keyframes monthIn{ from{ transform: perspective(900px) rotateX(-60deg) translateY(60px); opacity:0; } to{ transform:none; opacity:1; } }
+  .m h3{ display:flex; justify-content:space-between; align-items:baseline; font:800 31px/1 'Big Shoulders Display'; letter-spacing:.06em; text-transform:uppercase; }
+  .m h3 span{ font-size:20px; color:var(--orange-2); }
+  .wk,.dd{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; }
+  .wk{ margin:8px 0 2px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,.18); font:700 11px Inter; letter-spacing:.08em; color:rgba(255,255,255,.6); }
+  .wk span:first-child{ color:var(--orange-2); }
+  .dd span{ position:relative; isolation:isolate; font:600 16px/26px Inter; font-variant-numeric:tabular-nums; }
+  .dd .sun{ color:var(--orange-2); }
+  .dd .h::before{ content:""; position:absolute; left:50%; top:50%; width:24px; height:24px; border-radius:50%; transform:translate(-50%,-50%) scale(0); z-index:-1; animation: pop .5s cubic-bezier(.2,1.6,.4,1) both; animation-delay: inherit; }
+  .dd .ht::before{ background:rgba(255,106,26,.92); }
+  .dd .us::before{ box-shadow: inset 0 0 0 2px var(--cyan); }
+  .dd .ht.us::before{ box-shadow: 0 0 0 2px var(--cyan); }
+  .dd .ht{ color:#fff; }
+  @keyframes pop{ to{ transform:translate(-50%,-50%) scale(1);} }
+
+  /* ---- outro ---- */
+  #outro{ left:0; right:0; top:700px; bottom:0; }
+  #veil{ inset:0; background: linear-gradient(180deg, rgba(4,16,63,0) 0%, rgba(4,16,63,.88) 14%, #04103F 100%); }
+  #veil.a{ animation-name: fadeIn; --t:13.3s; --d:.9s; }
+  #greet{ left:0; right:0; top:170px; text-align:center; }
+  #greet h2{ font:900 112px/.9 'Big Shoulders Display'; letter-spacing:.01em; }
+  #greet h2 em{ font-style:normal; background:linear-gradient(180deg,#FFD08A,#FF5A0A); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #greet p{ margin-top:18px; font:600 28px/1.3 Inter; color:rgba(255,255,255,.88); }
+  #greet p em{ font-style:normal; color:var(--orange-2); }
+  #greet.a{ animation-name: up2; --t:13.7s; --d:.9s; }
+  @keyframes up2{ from{ opacity:0; transform:translateY(50px);} to{ opacity:1; transform:none;} }
+  #langs{ display:flex; justify-content:center; gap:14px; margin-top:22px; }
+  #langs span{ font:700 20px Inter; padding:9px 18px; border-radius:999px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); }
+  #contact{ left:60px; right:60px; top:620px; display:flex; align-items:center; gap:36px; padding:30px; border-radius:30px; background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.18); }
+  #contact.a{ animation-name: up2; --t:14.2s; --d:.9s; }
+  #contact .qr{ position:relative; width:230px; height:230px; border-radius:22px; background:#fff; padding:12px; flex:0 0 auto; }
+  #contact .qr img.code{ width:100%; height:100%; }
+  #contact .qr img.wa{ position:absolute; left:50%; top:50%; width:52px; transform:translate(-50%,-50%); border:5px solid #fff; border-radius:50%; background:#fff; }
+  #contact ul{ list-style:none; }
+  #contact li{ font:800 50px/1.08 'Big Shoulders Display'; }
+  #contact li small{ display:block; font:600 16px Inter; letter-spacing:.22em; color:rgba(255,255,255,.6); text-transform:uppercase; }
+  #contact li + li{ margin-top:14px; }
+  #contact .scan{ margin-top:14px; font:700 18px Inter; color:var(--cyan); letter-spacing:.06em; }
+  #addr{ left:60px; right:60px; top:960px; text-align:center; font:500 21px/1.55 Inter; color:rgba(255,255,255,.75); }
+  #addr.a{ animation-name: up2; --t:14.6s; --d:.8s; }
+  #fadeout{ inset:0; background:#020A2E; opacity:0; animation: fadeEnd .5s ease-in 15.5s both; }
+  @keyframes fadeEnd{ to{ opacity:1; } }
+  .hidebefore{ }
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage">
+  <div id="orb1" class="abs orb"></div><div id="orb2" class="abs orb"></div>
+  <div id="dots" class="abs"></div>
+  <svg id="waves" class="abs" viewBox="0 0 1080 1920" aria-hidden="true"><g fill="none" stroke="#9CC8FF" stroke-opacity=".35" stroke-width="1.4" id="wv"></g></svg>
+
+  <svg id="route" class="abs" viewBox="0 0 1080 1920" aria-hidden="true">
+    <defs><linearGradient id="rg" x1="0" x2="1" y1="1" y2="0"><stop offset="0" stop-color="#FFB347"/><stop offset="1" stop-color="#fff"/></linearGradient></defs>
+    <path class="path" d="M 150 1450 C 260 900, 620 640, 930 560" fill="none" stroke="url(#rg)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 150 1450 C 260 900, 620 640, 930 560" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2" stroke-dasharray="2 14" class="pin" style="animation-delay:.2s,2.7s"/>
+    <g class="pin" style="animation-delay:.15s,2.7s"><circle cx="150" cy="1450" r="12" fill="#FFB347"/><circle cx="150" cy="1450" r="30" fill="none" stroke="#FFB347" stroke-opacity=".5" stroke-width="3"/></g>
+    <g class="pin" style="animation-delay:1.6s,2.7s"><circle cx="930" cy="560" r="12" fill="#5FD3FF"/><circle cx="930" cy="560" r="30" fill="none" stroke="#5FD3FF" stroke-opacity=".5" stroke-width="3"/></g>
+    <text class="city" x="190" y="1500" style="animation-delay:.3s,2.7s">MIAMI</text>
+    <text class="city" x="810" y="625" style="animation-delay:1.7s,2.7s" text-anchor="end">HAÏTI</text>
+  </svg>
+  <img id="plane" class="abs" src="assets/plane.png" alt="">
+
+  <div id="hero" class="abs">
+    <div id="ring" class="abs"><svg viewBox="0 0 300 300" id="ringsvg"></svg><img src="assets/logo_white.png" alt="JP's Logistics & More"></div>
+    <img id="flex" class="abs a" src="assets/flex_clean.png" alt="JP's FLEX">
+    <div id="kicker" class="abs a">MIAMI <b>⇄</b> HAÏTI · CALENDAR</div>
+
+    <div id="year" class="abs"><div class="row">
+      <span class="dig a" style="--t:3.0s">2</span><span class="dig a" style="--t:3.12s">0</span><span class="dig a" style="--t:3.24s">2</span>
+      <span class="slot"><span class="six dig a">6</span><span class="seven a">7</span></span>
+    </div></div>
+    <div id="flash" class="abs a"></div>
+
+    <div id="glow" class="abs a"></div>
+    <div id="truck" class="abs a"><img src="assets/truck.png" alt=""><i class="beam a" style="left:248px; top:228px"></i><i class="beam a" style="left:368px; top:226px"></i></div>
+    <div id="ship" class="abs a"><img src="assets/ship_clean.png" alt=""></div>
+
+    <div id="band" class="abs">
+      <img id="medal" class="a" src="assets/medal.png" alt="">
+      <div id="partner" class="a">#1 PARTNER<small>For all your logistics<br>and shipping needs!</small></div>
+    </div>
+  </div>
+
+  <div id="services" class="abs a">
+    <div class="svc a" style="--t:7.9s"><div class="ic"><svg width="36" height="36" viewBox="0 0 24 24" fill="#fff"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div><div><b>Air freight</b><span>Express to Haiti</span></div></div>
+    <div class="svc a" style="--t:8.0s"><div class="ic"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 17l2 3h14l2-3M5 17V11h14v6M8 11V7h8v4M12 3v4"/></svg></div><div><b>Sea cargo</b><span>Containers &amp; barrels</span></div></div>
+    <div class="svc a" style="--t:8.1s"><div class="ic"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></div><div><b>Sourcing</b><span>Suppliers for you</span></div></div>
+    <div class="svc a" style="--t:8.2s"><div class="ic"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><div><b>Documents</b><span>Fast &amp; confidential</span></div></div>
+  </div>
+
+  <div id="months" class="abs"></div>
+
+  <div id="outro" class="abs">
+    <div id="veil" class="abs a"></div>
+    <div id="greet" class="abs a">
+      <h2>Happy New Year <em>2027</em></h2>
+      <div id="langs"><span>Bonne Année</span><span>Bòn Ane</span><span>Feliz Año</span></div>
+      <p>Connecting Haiti to the world, <em>one package at a time.</em></p>
+    </div>
+    <div id="contact" class="abs a">
+      <div class="qr"><img class="code" src="assets/qr.svg" alt="WhatsApp QR"><img class="wa" src="assets/whatsapp.png" alt=""></div>
+      <div><ul><li><small>USA · Miami</small>+1 786-424-8025</li><li><small>Haïti · Pétion-Ville</small>+509 3702-1722</li></ul><p class="scan">Scan to chat on WhatsApp</p></div>
+    </div>
+    <div id="addr" class="abs a">8125 NW 67th Street, Miami, FL 33166 · 11, Rue Rogé, Pétion-Ville<br>jpslogisticsmiami@gmail.com · jpslogisticshaiti@gmail.com · jpsflexshipping@gmail.com</div>
+  </div>
+  <div id="fadeout" class="abs"></div>
+</div></div>
+
+<script src="caldata.js"></script>
+<script>
+  // logo ring
+  (function(){ let h=''; for(let i=0;i<36;i++){ const a=i/36*Math.PI*2; h+=`<circle cx="${150+132*Math.cos(a)}" cy="${150+132*Math.sin(a)}" r="${i%3?5.5:7.5}" fill="#fff" opacity="${i%3?.85:1}"/>`; } document.getElementById('ringsvg').innerHTML=h; })();
+  // contour lines
+  (function(){ let h=''; for(let i=0;i<18;i++){ const y=1500+i*14; h+=`<path d="M -40 ${y+300} C 160 ${y-120-i*5}, 300 ${y+220}, 520 ${y-60}"/><path d="M 1120 ${y+260} C 920 ${y-80+i*4}, 820 ${y+240}, 600 ${y-40}"/>`; } document.getElementById('wv').innerHTML=h; })();
+  // months (enter from 9.3 s, staggered)
+  (function(){
+    const el=document.getElementById('months');
+    el.innerHTML = CAL.months.map((m,i)=>{
+      const t=(9.35+i*0.13).toFixed(2);
+      const cells=m.cells.map(c=>!c?'<span></span>':`<span class="${[c.sun?'sun':'',(c.ht||c.us)?'h':'',c.ht?'ht':'',c.us?'us':''].join(' ')}" style="animation-delay:${(+t+0.5).toFixed(2)}s">${c.d}</span>`).join('');
+      return `<div class="m a" style="--t:${t}s"><h3>${m.name}<span>${String(i+1).padStart(2,'0')}</span></h3>
+        <div class="wk"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="dd">${cells}</div></div>`;
+    }).join('');
+    // fade the month grid away before the outro
+    el.animate([{opacity:1, transform:'none'},{opacity:.0, transform:'translateY(40px) scale(.97)'}],{duration:700, delay:13100, fill:'both', easing:'ease-in'});
+  })();
+  // pseudo-element .h::before uses animation-delay: inherit -> set explicit start for each holiday circle via CSS var not possible; handled above per span.
+
+  // fit to window
+  function fit(){ const s=Math.min(innerWidth/1080, innerHeight/1920); document.getElementById('fit').style.transform=`scale(${s})`; }
+  addEventListener('resize',fit); fit();
+
+  // Loop the whole 16 s timeline (when viewed in a browser). ?capture=1 pauses for frame-by-frame rendering.
+  const TOTAL=16000;
+  window.seek = (ms)=>{ document.getAnimations().forEach(a=>{ a.pause(); a.currentTime = ms; }); };
+  if (!/capture=1/.test(location.search)) {
+    let start=performance.now();
+    (function loop(now){ if(now-start>=TOTAL){ start=now; document.getAnimations().forEach(a=>{ a.currentTime=0; a.play(); }); } requestAnimationFrame(loop); })(start);
+  }
+</script>
+</body>
+</html>
