@@ -129,6 +129,33 @@
   #contact .scan{ margin-top:12px; font:800 17px Inter; letter-spacing:.05em; color:var(--blue2); }
   #addr{ left:60px; right:60px; top:740px; text-align:center; font:500 20px/1.55 Inter; color:var(--txt2); } #addr.a{ animation-name:up; --t:14.5s; --d:.8s; }
   #fadeout{ inset:0; opacity:0; animation:fadeEnd .5s ease-in 15.5s both; } body.blue #fadeout{ background:#020A2E; } body.white #fadeout{ background:#fff; } @keyframes fadeEnd{ to{ opacity:1 } }
+
+  /* ---- extras: shine, sparkles, plane, ripples, glint, confetti, camera ---- */
+  #stage{ animation: cam 16s ease-in-out both; transform-origin:50% 38%; }
+  @keyframes cam{ from{ transform:scale(1) } to{ transform:scale(1.035) } }
+  body.blue{ --shine:#FFF3C4; } body.white{ --shine:#7FA8FF; }
+  #year .d{ background:linear-gradient(105deg,var(--year) 38%,var(--shine) 50%,var(--year) 62%); background-size:320% 100%; background-position:120% 0; -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #year .d.a{ animation-name:digRise, shine; animation-delay:var(--t), 3.2s; animation-duration:.9s, 1.4s; animation-timing-function:cubic-bezier(.2,.8,.2,1), ease-in-out; }
+  @keyframes shine{ from{ background-position:120% 0 } to{ background-position:-20% 0 } }
+  #year .seven{ background:linear-gradient(105deg,var(--seven) 38%,#fff 50%,var(--seven) 62%); background-size:320% 100%; background-position:120% 0; -webkit-background-clip:text; background-clip:text; color:transparent; }
+  #year .seven.a{ animation-name:sevenIn, shine; animation-delay:1.9s, 3.5s; animation-duration:1s, 1.4s; animation-timing-function:cubic-bezier(.2,1.5,.35,1), ease-in-out; }
+  .sp{ position:absolute; width:var(--s); height:var(--s); border-radius:50%; background:#fff; opacity:0; animation:spark var(--dur) ease-in-out var(--dl) infinite both; pointer-events:none; }
+  body.white .sp{ background:#8FB3FF; }
+  @keyframes spark{ 0%{ opacity:0; transform:translateY(0) scale(.4) } 25%{ opacity:.9 } 100%{ opacity:0; transform:translateY(-220px) scale(1.2) } }
+  #planeFly{ left:-260px; top:560px; width:210px; filter:drop-shadow(0 12px 14px rgba(0,8,50,.3)); animation:flyby 2.2s cubic-bezier(.4,.1,.4,1) 3.0s both; }
+  @keyframes flyby{ 0%{ transform:translate(0,40px) rotate(-5deg); opacity:0 } 10%{ opacity:1 } 100%{ transform:translate(1500px,-90px) rotate(-8deg); opacity:1 } }
+  #trail{ left:0; top:612px; width:1080px; height:6px; opacity:.0; background:repeating-linear-gradient(90deg,var(--orange) 0 6px,transparent 6px 18px); animation:trail 2.2s ease 3.0s both; }
+  @keyframes trail{ 0%{ opacity:.8; clip-path:inset(0 100% 0 0) } 50%{ opacity:.8; clip-path:inset(0 0 0 0) } 100%{ opacity:0; clip-path:inset(0 0 0 100%) } }
+  .rip{ left:50%; top:50%; width:560px; height:560px; margin:-280px 0 0 -280px; border-radius:50%; border:3px solid rgba(255,255,255,.7); opacity:0; animation:ripple 2.4s ease-out var(--rd) both; }
+  body.white .rip{ border-color:rgba(28,85,242,.45); }
+  @keyframes ripple{ 0%{ opacity:.85; transform:scale(1) } 100%{ opacity:0; transform:scale(1.75) } }
+  #glintWrap{ position:absolute; left:0; top:0; }
+  .glint{ position:absolute; width:46px; height:46px; opacity:0; background:conic-gradient(from 0deg,transparent 0 40deg,#fff 45deg,transparent 50deg 130deg,#fff 135deg,transparent 140deg 220deg,#fff 225deg,transparent 230deg 310deg,#fff 315deg,transparent 320deg); border-radius:50%; filter:blur(.6px); }
+  .glint{ -webkit-mask:radial-gradient(circle,#000 0 4px,rgba(0,0,0,.0) 22px); mask:radial-gradient(circle,#000 0 4px,rgba(0,0,0,.0) 22px); }
+  #partner img{ animation:medalSpin 1.4s cubic-bezier(.2,.9,.2,1) 4.3s both; } @keyframes medalSpin{ from{ transform:perspective(500px) rotateY(540deg) scale(.3); opacity:0 } to{ transform:none; opacity:1 } }
+  .conf{ position:absolute; top:-40px; width:var(--w); height:var(--h); background:var(--c); opacity:0; animation:fall var(--fd) linear var(--fdl) both; }
+  @keyframes fall{ 0%{ opacity:1; transform:translate(0,0) rotate(0deg) } 100%{ opacity:1; transform:translate(var(--dx),2100px) rotate(var(--rot)) } }
+  #qrp{ animation:qrpulse 2s ease-in-out 15s both; }
 </style></head>
 <body class="blue">
 <div id="fit"><div id="stage">
@@ -138,10 +165,13 @@
   <div id="rule" class="abs a"></div>
   <div id="year" class="abs"><span class="d a" style="--t:1.1s">2</span><span class="d a" style="--t:1.25s">0</span><span class="d a" style="--t:1.4s">2</span><span class="seven a">7</span></div>
   <div id="flash" class="abs a"></div>
+  <div id="trail" class="abs"></div><img id="planeFly" class="abs" src="assets/plane.svg" alt="">
+  <div id="sparks"></div>
 
   <div id="heroGroup" class="abs a">
     <div id="hero" class="abs">
       <div id="halo" class="halo abs a"></div>
+      <i class="rip abs" style="--rd:3.4s"></i><i class="rip abs" style="--rd:4.2s"></i><i class="rip abs" style="--rd:8.9s"></i><i class="rip abs" style="--rd:9.6s"></i>
       <svg id="orbit" class="abs" width="1040" height="500" viewBox="0 0 1040 500"><ellipse cx="520" cy="250" rx="490" ry="130" fill="none" stroke="#FF6A1A" stroke-width="3" stroke-dasharray="3 14" stroke-linecap="round" transform="rotate(-10 520 250)"/></svg>
       <div id="globe" class="abs a"><img src="assets/globe.png" alt=""></div>
       <div id="conts" class="abs a"><img src="assets/containers.png" alt=""></div>
@@ -162,6 +192,7 @@
     <div id="contact" class="abs a"><div class="qr"><img class="code" src="assets/qr.svg" alt=""><img class="wa" src="assets/whatsapp.png" alt=""></div><div><ul><li><small>USA · Miami</small>+1 786-424-8025</li><li><small>Haïti · Pétion-Ville</small>+509 3702-1722</li></ul><p class="scan">Scan to chat on WhatsApp</p></div></div>
     <div id="addr" class="abs a">8125 NW 67th Street, Miami, FL 33166 · 11, Rue Rogé, Pétion-Ville<br>jpslogisticsmiami@gmail.com · jpslogisticshaiti@gmail.com · jpsflexshipping@gmail.com</div>
   </div>
+  <div id="confetti"></div>
   <div id="fadeout" class="abs"></div>
 </div></div>
 <script src="caldata.js"></script>
@@ -175,6 +206,15 @@
     const cells=m.cells.map(c=>!c?'<span></span>':`<span class="${[c.sun?'sun':'',(c.ht||c.us)?'h':'',c.ht?'ht':'',c.us?'us':''].join(' ')}" style="--hd:${(t+0.6).toFixed(2)}s">${c.d}</span>`).join('');
     return `<div class="m a" style="--t:${t.toFixed(2)}s"><h3>${m.name}<span>${String(i+1).padStart(2,'0')}</span></h3><div class="wk"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="dd">${cells}</div></div>`;
   }).join('');
+
+  // ambient sparkles (deterministic)
+  (function(){ let seed=7; const r=()=> (seed=(seed*16807)%2147483647)/2147483647; let h='';
+    for(let i=0;i<34;i++){ const x=r()*1040+20, y=300+r()*1500, sz=3+r()*6, dur=3+r()*3, dl=(r()*6).toFixed(2); h+=`<i class="sp" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;--s:${sz.toFixed(1)}px;--dur:${dur.toFixed(1)}s;--dl:${dl}s"></i>`; }
+    document.getElementById('sparks').innerHTML=h; })();
+  // confetti burst at the outro (13.7 s)
+  (function(){ let seed=11; const r=()=> (seed=(seed*16807)%2147483647)/2147483647; const cols=['#FF6A1A','#FFB347','#1C55F2','#5FB4FF','#fff','#2BB673','#E4473B']; let h='';
+    for(let i=0;i<80;i++){ const x=r()*1080, w=8+r()*10, hh=14+r()*14, fd=3+r()*2.5, dl=(13.7+r()*0.9).toFixed(2), dx=((r()-.5)*260).toFixed(0), rot=((r()-.5)*1440).toFixed(0); h+=`<i class="conf" style="left:${x.toFixed(0)}px;--w:${w.toFixed(0)}px;--h:${hh.toFixed(0)}px;--c:${cols[i%cols.length]};--fd:${fd.toFixed(2)}s;--fdl:${dl}s;--dx:${dx}px;--rot:${rot}deg"></i>`; }
+    document.getElementById('confetti').innerHTML=h; })();
   function fit(){ const s=Math.min(innerWidth/1080, innerHeight/1920); document.getElementById('fit').style.transform=`scale(${s})`; document.getElementById('fit').style.transformOrigin='center center'; }
   addEventListener('resize',fit); fit();
   const TOTAL=16000;
