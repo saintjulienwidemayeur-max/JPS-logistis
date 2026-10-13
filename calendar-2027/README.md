@@ -1,20 +1,15 @@
 # JP's Logistics & More — Calendar 2027
 
-| File | Use |
+4 posters: Model A (Global) and Model B (Import/Export), each on a BLUE and a WHITE background.
+
+| Folder | Use |
 |---|---|
-| `JPS-2027-Modele-A-Global-20x28in.pdf` | Model A (globe · plane · truck · ship), print-ready 20 × 28 in, blue background |
-| `JPS-2027-Modele-B-Import-Export-20x28in.pdf` | Model B (EXPORT / IMPORT containers), print-ready 20 × 28 in, blue background |
-| `JPS-2027-Modele-A-Global-FOND-BLANC-20x28in.pdf`, `JPS-2027-Modele-B-Import-Export-FOND-BLANC-20x28in.pdf` | Same models with a white background |
-| `JPS-2027-Modele-A-apercu.jpg`, `JPS-2027-Modele-B-apercu.jpg` | Images for WhatsApp / iPhone / social media (2160 × 3024 px) |
-| `JPS-2027-motion-blue-1080x1920.mp4` / `JPS-2027-motion-white-1080x1920.mp4` | 16-second animated videos, vertical 9:16, blue and white backgrounds |
-| `web/posters/modelA.html`, `web/posters/modelB.html` | Editable sources of the two posters (open in Chrome, print to PDF at 20 × 28 in) |
-| `web/motion/index.html` | The animation as a web page (add `?theme=white` for the white version) |
+| `1-IMPRESSION-PDF-300dpi/` | **Send to the printer.** PDF 20 × 28 in, 300 dpi (6000 × 8400 px) |
+| `2-IMAGES-PNG-6000x8400/` | Lossless PNG, same resolution (printer / designer) |
+| `3-IMAGES-JPG-iPhone-WhatsApp/` | Light JPG 2160 × 3024 for iPhone, WhatsApp, social media |
+| `JPS-2027-motion-blue-1080x1920.mp4`, `JPS-2027-motion-white-1080x1920.mp4` | 16-second animated videos with music, vertical Full HD |
+| `web/` | Editable HTML sources (posters and animation) |
 
-The two photos supplied by the client were upscaled ×4 (EDSR) and cut out so they print sharply.
-
-Holidays: orange circle = Haiti public holiday, blue ring = U.S. federal holiday
-(moveable dates computed from Easter 2027, March 28, in `caldata.js`).
-
+Holidays: orange circle = Haiti public holiday, blue ring = U.S. federal holiday (moveable dates computed from Easter 2027, March 28).
 QR code → WhatsApp https://wa.me/17864248025 · Haiti phone +509 3702-1722
-
-The PDFs are a single 288 dpi image (5760 × 8064 px) so they look identical in every viewer (iPhone Quick Look, Preview, print shops).
+Tip for the printer: ask for 20 × 28 in, glossy or satin paper; no bleed is included (add 3 mm of background if they require it).
