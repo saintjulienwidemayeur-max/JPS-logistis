@@ -1,0 +1,31 @@
+/* ---- blue background theme (overrides) ---- */
+.poster{ background:
+   radial-gradient(1100px 800px at 80% 8%, rgba(95,180,255,.45), transparent 60%),
+   radial-gradient(1000px 900px at 0% 35%, rgba(28,85,242,.9), transparent 65%),
+   linear-gradient(180deg,#0E36C9 0%, #1447E3 30%, #0F3BCC 60%, #0A2690 85%, #071C66 100%) !important; }
+.bgsoft{ display:none; }
+.dots{ opacity:.18 !important; background-image: radial-gradient(#fff 1.6px, transparent 1.8px) !important; }
+.head .mid, .kick{ color:rgba(255,255,255,.82) !important; }
+.head .mid b, .kick b{ color:#FFB347 !important; }
+.year, .y{ color:#fff !important; text-shadow:0 18px 40px rgba(0,10,60,.35); }
+.year .seven, .y .seven{ color:#FF7A2E !important; }
+.p, .tag, .route, .svc li{ color:#fff !important; }
+.sub, .rt{ color:rgba(255,255,255,.75) !important; }
+.tag em{ color:#FFB347 !important; }
+.halo{ background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #F1F6FF 60%, #DCE9FF 100%) !important; box-shadow:0 30px 80px -20px rgba(0,8,50,.55) !important; }
+.stripes{ display:none; }
+.ring{ box-shadow:0 40px 90px -30px rgba(0,8,50,.6) !important; }
+/* model B band: white on blue */
+.band{ background:#fff !important; color:var(--navy) !important; }
+.band h2{ color:var(--navy); } .band small{ color:var(--soft) !important; }
+.band .tag{ color:var(--navy) !important; } .band .tag em{ color:var(--orange) !important; }
+/* cards stay white for readability */
+.card, .mc{ border-color:rgba(255,255,255,.6) !important; box-shadow:0 18px 34px -20px rgba(0,8,50,.6) !important; }
+/* footer on navy */
+.footer{ background:#061A5C !important; }
+.fcols h4{ color:#7EC8FF !important; } .fcols h4.o{ color:#FFB347 !important; }
+.chips span{ background:rgba(255,255,255,.08) !important; border-color:rgba(255,255,255,.22) !important; color:#fff !important; }
+.contact li{ color:rgba(255,255,255,.9) !important; }
+.contact svg{ stroke:#7EC8FF; }
+.phones li{ color:#fff !important; } .phones li small, .phones li.em, .qr p{ color:rgba(255,255,255,.65) !important; }
+.qr .box{ border-color:#fff !important; }
