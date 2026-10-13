@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>JP's Logistics & More — Calendar 2027 (Model B · Import / Export)</title>
+<link rel="stylesheet" href="fonts/local.css"><link rel="stylesheet" href="common.css">
+<style>
+  .stripes{ position:absolute; right:0; top:0; width:980px; height:1180px;
+    background: radial-gradient(700px 620px at 58% 52%, #EAF2FF 0%, #F6F9FF 55%, rgba(255,255,255,0) 72%); }
+  .ring{ position:absolute; right:90px; top:250px; width:820px; height:820px; border-radius:50%; background:#fff; box-shadow: 0 40px 80px -40px rgba(14,54,201,.35), inset 0 0 0 2px #E3EBFA; }
+
+  .brand{ position:absolute; left:96px; top:70px; display:flex; align-items:center; gap:34px; }
+  .brand img.logo{ width:300px; } .brand img.flex{ width:330px; }
+  .kick{ position:absolute; left:100px; top:292px; font:800 24px/1 Inter; letter-spacing:.5em; color:var(--soft); text-transform:uppercase; }
+  .kick b{ color:var(--orange); }
+  .y{ position:absolute; left:84px; font:900 470px/360px 'Big Shoulders Display'; letter-spacing:.01em; color:var(--navy); white-space:nowrap; }
+  .y1{ top:372px; } .y2{ top:772px; }
+  .y2 .seven{ color:var(--orange); }
+  .ybar{ position:absolute; left:100px; top:1214px; width:560px; height:0; }
+
+  .cables{ position:absolute; left:0; top:0; width:1920px; height:1180px; pointer-events:none; }
+  .boxes{ position:absolute; right:10px; top:-24px; width:1060px; }
+
+  .band{ position:absolute; left:0; right:0; top:1196px; height:132px; background:var(--navy); display:flex; align-items:center; padding:0 96px; gap:24px; color:#fff; }
+  .band::after{ content:""; position:absolute; left:0; right:0; bottom:-8px; height:8px; background:linear-gradient(90deg,var(--orange),#FFB347 45%, var(--sky)); }
+  .band img{ width:100px; }
+  .band h2{ font:900 84px/.9 'Big Shoulders Display'; letter-spacing:.01em; }
+  .band small{ display:block; font:700 18px/1.3 Inter; letter-spacing:.12em; color:#BFD3FF; margin-top:6px; text-transform:uppercase; }
+  .band .sp{ flex:1; }
+  .band .tag{ text-align:right; font:700 30px/1.25 Inter; }
+  .band .tag em{ font-style:normal; color:#FFB347; }
+
+  /* months 4 x 3 */
+  .grid{ position:absolute; left:96px; right:96px; top:1366px; display:grid; grid-template-columns:repeat(4,1fr); gap:22px 22px; }
+  .mc{ position:relative; height:316px; border-radius:20px; background:#fff; border:2px solid var(--line); overflow:hidden; box-shadow:0 12px 26px -20px rgba(10,35,112,.45); }
+  .mc h3{ display:flex; justify-content:space-between; align-items:center; height:56px; padding:0 18px; background:var(--navy); color:#fff; font:800 34px/1 'Big Shoulders Display'; letter-spacing:.07em; text-transform:uppercase; }
+  .mc:nth-child(odd) h3{ background:var(--blue); }
+  .mc h3 span{ font-size:22px; color:#FFB347; }
+  .mc .wk{ margin:8px 14px 2px; padding-bottom:5px; border-bottom:2px solid var(--line); font:800 13px Inter; letter-spacing:.08em; color:var(--soft); }
+  .mc .wk span:first-child{ color:var(--orange-d); }
+  .mc .days{ margin:0 14px; }
+  .mc .days span{ font:600 19.5px/28px Inter; }
+  .mc .days span.h::before{ width:27px; height:27px; }
+  .mc .hol{ position:absolute; left:16px; right:14px; bottom:9px; font:500 11.5px/1.3 Inter; color:var(--soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .footer{ position:absolute; left:0; right:0; bottom:0; height:300px; background:var(--tint); }
+  .fcols{ position:absolute; left:96px; right:96px; top:50px; display:grid; grid-template-columns:2fr 1fr .95fr 190px; gap:30px; align-items:start; }
+  .fcols h4{ font:800 28px/1 'Big Shoulders Display'; letter-spacing:.08em; text-transform:uppercase; color:var(--blue); margin-bottom:9px; }
+  .fcols h4.o{ color:var(--orange); margin-top:14px; }
+</style></head>
+<body><div class="poster">
+  <div class="stripes"></div><div class="ring"></div>
+  <div class="brand"><img class="logo" src="assets/logo_color.png" alt="JP's Logistics & More"><img class="flex" src="assets/flex_clean.png" alt="JP's FLEX"></div>
+  <div class="kick">Calendar <b>·</b> Miami ⇄ Haiti</div>
+  <div class="y y1">20</div>
+  <div class="y y2">2<span class="seven">7</span></div>
+
+  
+  <img class="boxes" src="assets/containers_cut.png" alt="">
+
+  <div class="band">
+    <img src="assets/medal.png" alt="">
+    <div><h2>#1 PARTNER</h2><small>For all your logistics and shipping needs!</small></div>
+    <div class="sp"></div>
+    <div class="tag">Connecting Haiti to the world,<br><em>one package at a time.</em></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="footer"><div class="fcols"><div class="fsvc"><h4>International services</h4>
+  <div class="chips"><span>Air service to P-a-P</span><span>Saint-Marc / Cap-Haïtien</span><span>Santo Domingo</span><span>Return shipping to the US</span><span>Product sourcing</span></div>
+  <h4 class="o">Local services</h4>
+  <div class="chips"><span>Pickup</span><span>Delivery</span><span>Moving</span><span>Container loading / unloading</span><span>Warehouse</span><span>Storage</span></div></div>
+<ul class="contact">
+  <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E36C9" stroke-width="2"><path d="M12 22s7-7.6 7-13a7 7 0 10-14 0c0 5.4 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><span><b>Miami</b> — 8125 NW 67th Street,<br>Miami, Florida 33166</span></li>
+  <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6A1A" stroke-width="2"><path d="M12 22s7-7.6 7-13a7 7 0 10-14 0c0 5.4 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg><span><b>Haiti</b> — 11, Rue Rogé,<br>Pétion-Ville</span></li>
+  <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B1B3F" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>jpslogisticsmiami@gmail.com<br>jpslogisticshaiti@gmail.com<br>jpsflexshipping@gmail.com</span></li>
+</ul>
+<ul class="phones"><li><small>USA · Miami</small>+1 786-424-8025</li><li><small>Haïti · Pétion-Ville</small>+509 3702-1722</li><li class="em">contact@jpslogistics.me</li></ul>
+<div class="qr"><div class="box"><img class="code" src="assets/qr.svg" alt=""><img class="wa" src="assets/whatsapp.png" alt=""></div><p>Scan · WhatsApp</p></div>
+</div></div>
+</div>
+<script src="caldata.js"></script><script src="months.part.js"></script>
+<script>renderMonths(document.getElementById('grid'),'mc');</script>
+</body></html>
