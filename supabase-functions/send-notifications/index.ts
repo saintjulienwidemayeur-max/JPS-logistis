@@ -232,7 +232,7 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
     const supportHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border:1px solid #E6EAF4;border-radius:14px;"><tr><td style="padding:16px 18px;font-family:${FONT};">
           <div style="font-size:12px;color:#6B7490;text-transform:uppercase;letter-spacing:1px;">&#128205; ${m.pickupTitle}</div>
           <div style="font-size:14px;color:#1B2540;margin-top:6px;">${m.pickupText}</div>
-          <div style="font-size:15px;font-weight:bold;color:#0D2B80;margin-top:6px;line-height:1.5;">JP's Logistics &amp; More LLC<br>11, Rue Rogé, Pétion-Ville, ${m.country}<br>+509 3702-1722</div>
+          <div style="font-size:15px;font-weight:bold;color:#0D2B80;margin-top:6px;line-height:1.5;">JP's Logistics &amp; More LLC<br>11, Rue Oge, Pétion-Ville, ${m.country}<br>+509 3702-1722</div>
         </td></tr></table>
         <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:18px auto 4px;"><tr><td style="background:#25D366;border-radius:999px;">
           <a href="https://wa.me/17864248025" style="display:block;padding:10px 22px 10px 14px;text-decoration:none;color:#ffffff;font-weight:bold;font-size:14px;font-family:${FONT};"><img src="${SITE_URL}/whatsapp.png" width="24" height="24" alt="WhatsApp" style="vertical-align:middle;border:0;margin-right:8px;"><span style="vertical-align:middle;">${m.support}</span></a>
