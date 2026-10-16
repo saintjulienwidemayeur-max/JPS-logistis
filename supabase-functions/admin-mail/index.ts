@@ -10,6 +10,8 @@
 //   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments? }
 //        attachments: up to 3 files [{ name, content }], content = the file in base64 (a PDF, at most 3 MB each): used by the warehouse
 //        and billing apps to send the receipt / the invoice as a PDF.
+//   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments? }
+//        to a customer who has no account on the website (the warehouse app sends receipts / invoices to the e-mail it has on file)
 //   { action: "broadcast", staff_email, staff_password, subject, message }
 
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -163,6 +165,16 @@ Deno.serve(async (req) => {
         .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
         .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
       await sendMail(list[0], subject, message, files);
+      return json({ ok: true, sent: 1, total: 1, attached: files.length });
+    }
+
+    if (body?.action === "send_to") {
+      const to = String(body.to_email ?? "").trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to) || to.length > 120) return json({ error: "BAD_REQUEST" }, 400);
+      const files: Attachment[] = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 3)
+        .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
+        .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
+      await sendMail({ name: String(body.to_name ?? "").slice(0, 80), email: to, lang: String(body.lang ?? "fr") }, subject, message, files);
       return json({ ok: true, sent: 1, total: 1, attached: files.length });
     }
 
