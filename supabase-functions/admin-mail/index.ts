@@ -7,7 +7,9 @@
 // SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 //
 // POST JSON (header "apikey: <publishable key>"):
-//   { action: "send",      staff_email, staff_password, client_id, subject, message }
+//   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments? }
+//        attachments: up to 3 files [{ name, content }], content = the file in base64 (a PDF, at most 3 MB each): used by the warehouse
+//        and billing apps to send the receipt / the invoice as a PDF.
 //   { action: "broadcast", staff_email, staff_password, subject, message }
 
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -102,7 +104,8 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
   return html;
 }
 
-async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string) {
+type Attachment = { name: string; content: string };
+async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = []) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": brevoKey, "content-type": "application/json", accept: "application/json" },
@@ -112,6 +115,7 @@ async function sendMail(client: { name?: string; email: string; lang?: string },
       to: [{ email: client.email, name: client.name }],
       subject,
       htmlContent: buildEmail(client, subject, message),
+      ...(attachments.length ? { attachment: attachments } : {}),
     }),
   });
   if (!res.ok) {
@@ -154,8 +158,12 @@ Deno.serve(async (req) => {
     if (body?.action === "send") {
       const list = await getClients({ id: String(body.client_id ?? "") });
       if (!list.length) return json({ error: "CLIENT_NOT_FOUND" }, 404);
-      await sendMail(list[0], subject, message);
-      return json({ ok: true, sent: 1, total: 1 });
+      // Optional files (base64): at most 3, each at most 3 MB, a plain file name.
+      const files: Attachment[] = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 3)
+        .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
+        .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
+      await sendMail(list[0], subject, message, files);
+      return json({ ok: true, sent: 1, total: 1, attached: files.length });
     }
 
     if (body?.action === "send_many") {
