@@ -539,3 +539,60 @@ end;
 $$;
 revoke execute on function public.client_change_password(text, text, text) from public;
 grant  execute on function public.client_change_password(text, text, text) to anon, authenticated;
+
+
+-- ============================================================
+-- 15) ESTIMATE REQUESTS: a customer asks JP's to price some boxes
+-- The customer types the boxes (size, weight, contents) on the website; the warehouse app reads the requests (service_role) on its
+-- Estimate page, prices them, and answers by e-mail. The table has NO policy: only the functions below and the service_role touch it.
+-- Run this block once in the SQL Editor.
+-- ============================================================
+create table if not exists public.estimate_requests (
+  id              uuid primary key default gen_random_uuid(),
+  client_id       uuid not null references public.clients(id) on delete cascade,
+  boxes           jsonb not null,                    -- [{ "qty": 1, "l": 20, "w": 16, "h": 12, "lbs": 25, "contents": "shoes" }, ...]
+  ship_choice     text check (ship_choice in ('Air','Ocean')),
+  declared_value  numeric(10,2),
+  note            text,
+  status          text not null default 'new' check (status in ('new','answered')),
+  created_at      timestamptz not null default now(),
+  answered_at     timestamptz
+);
+create index if not exists estimate_requests_client on public.estimate_requests (client_id, created_at desc);
+alter table public.estimate_requests enable row level security;
+
+create or replace function public.client_add_estimate(
+  p_client_id uuid, p_boxes jsonb, p_ship text, p_declared numeric, p_note text
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare v_id uuid; b jsonb;
+begin
+  if not exists (select 1 from public.clients c where c.id = p_client_id) then raise exception 'NOT_AUTHORIZED'; end if;
+  if p_boxes is null or jsonb_typeof(p_boxes) <> 'array' or jsonb_array_length(p_boxes) = 0 or jsonb_array_length(p_boxes) > 10 then raise exception 'BAD_BOXES'; end if;
+  for b in select * from jsonb_array_elements(p_boxes) loop
+    if coalesce((b->>'l')::numeric, 0) <= 0 or coalesce((b->>'w')::numeric, 0) <= 0 or coalesce((b->>'h')::numeric, 0) <= 0
+       or coalesce((b->>'lbs')::numeric, 0) <= 0 or coalesce((b->>'qty')::numeric, 0) < 1
+       or (b->>'l')::numeric > 200 or (b->>'w')::numeric > 200 or (b->>'h')::numeric > 200 or (b->>'lbs')::numeric > 2000 or (b->>'qty')::numeric > 500 then
+      raise exception 'BAD_BOXES';
+    end if;
+  end loop;
+  if p_ship is not null and p_ship not in ('Air','Ocean') then raise exception 'BAD_SHIP'; end if;
+  if (select count(*) from public.estimate_requests r where r.client_id = p_client_id and r.created_at > now() - interval '1 day') >= 10 then raise exception 'TOO_MANY'; end if;
+  insert into public.estimate_requests (client_id, boxes, ship_choice, declared_value, note)
+  values (p_client_id, p_boxes, p_ship, case when p_declared > 0 then round(p_declared, 2) end, left(btrim(coalesce(p_note, '')), 500))
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+
+create or replace function public.client_list_estimates(p_client_id uuid)
+returns table(id uuid, boxes jsonb, ship_choice text, declared_value numeric, note text, status text, created_at timestamptz)
+language sql security definer set search_path = public as $$
+  select r.id, r.boxes, r.ship_choice, r.declared_value, r.note, r.status, r.created_at
+  from public.estimate_requests r where r.client_id = p_client_id order by r.created_at desc limit 20;
+$$;
+
+-- Same trust model as pre-alerts: the browser only calls the functions, with the customer's id.
+revoke all on table public.estimate_requests from anon, authenticated;
+grant execute on function public.client_add_estimate(uuid, jsonb, text, numeric, text) to anon, authenticated;
+grant execute on function public.client_list_estimates(uuid) to anon, authenticated;
