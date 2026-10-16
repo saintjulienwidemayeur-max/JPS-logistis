@@ -492,3 +492,50 @@ grant  execute on function public.client_add_prealert(uuid, text, text, text, te
 grant  execute on function public.client_list_prealerts(uuid)                  to anon, authenticated;
 grant  execute on function public.client_update_prealert(uuid, uuid, text, boolean) to anon, authenticated;
 grant  execute on function public.client_cancel_prealert(uuid, uuid)           to anon, authenticated;
+
+
+-- ============================================================
+-- 14) INVITATIONS FROM THE WAREHOUSE APP: who signed in + change my password
+-- Run this block once in the SQL Editor.
+-- ============================================================
+-- When a customer last signed in (the warehouse app counts who accepted the invitation).
+alter table public.clients add column if not exists last_login_at timestamptz;
+
+-- client_login now also stamps the sign-in time (same result columns as before).
+create or replace function public.client_login(p_email text, p_password text)
+returns table(id uuid, name text, email text, phone text, address text, city text, country text, box_number text, avatar_url text)
+language plpgsql security definer set search_path = public as $$
+declare
+  v_id uuid;
+begin
+  select c.id into v_id
+    from public.clients c
+    join public.client_auth a on a.client_id = c.id
+    where c.email = lower(p_email) and a.password_hash = public.jps_hash(p_password);
+  if v_id is null then return; end if;
+  update public.clients set last_login_at = now() where clients.id = v_id;
+  return query
+    select c.id, c.name, c.email, c.phone, c.address, c.city, c.country, c.box_number, c.avatar_url
+    from public.clients c where c.id = v_id;
+end;
+$$;
+
+-- A customer changes their own password (the current one is checked). Used by "Changer mon mot de passe" in the customer area.
+create or replace function public.client_change_password(p_email text, p_current text, p_new text)
+returns boolean
+language plpgsql security definer set search_path = public as $$
+declare
+  v_id uuid;
+begin
+  if length(coalesce(p_new, '')) < 8 then raise exception 'WEAK_PASSWORD'; end if;
+  select c.id into v_id
+    from public.clients c
+    join public.client_auth a on a.client_id = c.id
+    where c.email = lower(p_email) and a.password_hash = public.jps_hash(p_current);
+  if v_id is null then return false; end if;
+  update public.client_auth set password_hash = public.jps_hash(p_new) where client_id = v_id;
+  return true;
+end;
+$$;
+revoke execute on function public.client_change_password(text, text, text) from public;
+grant  execute on function public.client_change_password(text, text, text) to anon, authenticated;
