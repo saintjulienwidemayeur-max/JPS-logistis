@@ -158,6 +158,22 @@ Deno.serve(async (req) => {
       return json({ ok: true, sent: 1, total: 1 });
     }
 
+    if (body?.action === "send_many") {
+      // A list of client ids, the same message (the warehouse app sends 100 at a time).
+      const ids = Array.isArray(body.client_ids) ? body.client_ids.map(String).slice(0, 200) : [];
+      if (!ids.length) return json({ error: "BAD_REQUEST" }, 400);
+      let q = supabase.from("clients").select("name,email,lang").in("id", ids);
+      let r = await q;
+      if (r.error) r = await supabase.from("clients").select("name,email").in("id", ids); // `lang` column not created yet
+      const list = (r.data ?? []).filter((c: any) => c.email);
+      let sent = 0;
+      for (let i = 0; i < list.length; i += 10) {
+        const results = await Promise.allSettled(list.slice(i, i + 10).map((c: any) => sendMail(c, subject, message)));
+        sent += results.filter((x) => x.status === "fulfilled").length;
+      }
+      return json({ ok: true, sent, total: list.length });
+    }
+
     if (body?.action === "broadcast") {
       const list = await getClients();
       let sent = 0;
