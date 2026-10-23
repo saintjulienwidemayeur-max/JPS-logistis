@@ -32,6 +32,12 @@ const LABELS: Record<LangCode, string[]> = {
   en: ["received at the Miami warehouse", "in transit / at customs", "arrived in Haiti", "ready for pickup"],
   es: ["recibido en el depósito de Miami", "en tránsito / en aduana", "llegó a Haití", "listo para retirar"],
 };
+// Parcels going from Haiti to Miami (shipments.direction = 'US'): the same four steps, said for that route.
+const LABELS_US: Record<LangCode, string[]> = {
+  fr: ["reçu au bureau d'Haïti", "en transit vers Miami", "arrivé à Miami", "prêt pour retrait à Miami"],
+  en: ["received at the Haiti office", "in transit to Miami", "arrived in Miami", "ready for pickup in Miami"],
+  es: ["recibido en la oficina de Haití", "en tránsito a Miami", "llegó a Miami", "listo para retirar en Miami"],
+};
 const PUSH_BODY: Record<LangCode, (n: string, label: string) => string> = {
   fr: (n, label) => `Votre colis ${n} est maintenant : ${label}.`,
   en: (n, label) => `Your package ${n} is now: ${label}.`,
@@ -67,7 +73,7 @@ Deno.serve(async (req) => {
     const client = await getClient(supabase, record.client_id);
     const lang = asLang(client?.lang);
     const status = Math.min(Math.max(Number(record.status) || 0, 0), 3);
-    const label = LABELS[lang][status];
+    const label = (record.direction === "US" ? LABELS_US : LABELS)[lang][status];
 
     const { data: subs } = await supabase
       .from("push_subscriptions")
@@ -154,6 +160,31 @@ const STEP_NAMES: Record<LangCode, string[]> = {
   en: ["Received in Miami", "In transit / customs", "Arrived in Haiti", "Ready for pickup"],
   es: ["Recibido en Miami", "En tránsito / aduana", "Llegó a Haití", "Listo para retirar"],
 };
+const STEP_NAMES_US: Record<LangCode, string[]> = {
+  fr: ["Reçu au bureau d'Haïti", "En transit vers Miami", "Arrivé à Miami", "Prêt pour retrait à Miami"],
+  en: ["Received at the Haiti office", "In transit to Miami", "Arrived in Miami", "Ready for pickup in Miami"],
+  es: ["Recibido en la oficina de Haití", "En tránsito a Miami", "Llegó a Miami", "Listo para retirar en Miami"],
+};
+const STATUS_COPY_US: Record<LangCode, { title: string; text: string }[]> = {
+  fr: [
+    { title: "Votre colis est arrivé à notre bureau d'Haïti", text: "Nous avons bien reçu votre colis à notre bureau de Pétion-Ville. Il sera bientôt préparé pour l'expédition vers Miami." },
+    { title: "Votre colis est en route vers Miami", text: "Votre colis a quitté Haïti. Nous vous prévenons dès son arrivée à Miami." },
+    { title: "Votre colis est arrivé à Miami", text: "Bonne nouvelle : votre colis est arrivé à Miami. Il sera bientôt prêt pour le retrait." },
+    { title: "Votre colis est prêt !", text: "Votre colis est prêt pour le retrait à notre dépôt de Miami. Contactez-nous pour organiser la remise." },
+  ],
+  en: [
+    { title: "Your package arrived at our Haiti office", text: "We have received your package at our Pétion-Ville office. It will soon be prepared for shipping to Miami." },
+    { title: "Your package is on its way to Miami", text: "Your package has left Haiti. We'll let you know as soon as it arrives in Miami." },
+    { title: "Your package has arrived in Miami", text: "Good news: your package has arrived in Miami. It will soon be ready for pickup." },
+    { title: "Your package is ready!", text: "Your package is ready for pickup at our Miami warehouse. Contact us to arrange the handover." },
+  ],
+  es: [
+    { title: "Su paquete llegó a nuestra oficina de Haití", text: "Hemos recibido su paquete en nuestra oficina de Pétion-Ville. Pronto será preparado para el envío a Miami." },
+    { title: "Su paquete va en camino a Miami", text: "Su paquete salió de Haití. Le avisaremos en cuanto llegue a Miami." },
+    { title: "Su paquete llegó a Miami", text: "Buenas noticias: su paquete llegó a Miami. Pronto estará listo para retiro." },
+    { title: "¡Su paquete está listo!", text: "Su paquete está listo para retiro en nuestro depósito de Miami. Contáctenos para coordinar la entrega." },
+  ],
+};
 const STATUS_COPY: Record<LangCode, { title: string; text: string }[]> = {
   fr: [
     { title: "Votre colis est arrivé à Miami", text: "Nous avons bien reçu votre colis à notre dépôt de Miami. Il sera bientôt préparé pour l'expédition." },
@@ -182,8 +213,8 @@ const MAIL: Record<LangCode, Record<string, string>> = {
 const fill = (text: string, vars: Record<string, string | number>) =>
   text.replace(/\{(\w+)\}/g, (_m, k) => String(vars[k] ?? ""));
 
-function progressBar(current: number, lang: LangCode): string {
-  const cells = STEP_NAMES[lang].map((name, i) => {
+function progressBar(current: number, lang: LangCode, us = false): string {
+  const cells = (us ? STEP_NAMES_US : STEP_NAMES)[lang].map((name, i) => {
     const done = i <= current;
     return `<td width="25%" align="center" style="padding:0 3px;font-family:${FONT};">
       <div style="height:6px;border-radius:3px;background:${done ? "#FF5500" : "#DDE3F0"};"></div>
@@ -208,7 +239,7 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
 
     const m = MAIL[lang];
     const status = Math.min(Math.max(Number(record.status) || 0, 0), 3);
-    const copy = STATUS_COPY[lang][status];
+    const us = record.direction === "US", copy = (us ? STATUS_COPY_US : STATUS_COPY)[lang][status];
     const first = String(client.name ?? "").split(" ")[0];
     const lbs = parseFloat(String(record.weight ?? "").replace(",", ".")) || 0;
     const typeLabel = record.type === "Air" ? m.air : record.type === "Mer" ? m.sea : record.type;
@@ -217,7 +248,7 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
     if (record.description) rows += detailRow(m.description, String(record.description));
     if (record.type) rows += detailRow(m.type, String(typeLabel));
     if (record.weight) rows += detailRow(m.weight, String(record.weight));
-    rows += detailRow(m.status, `<span style="color:#FF5500;">${STEP_NAMES[lang][status]}</span>`);
+    rows += detailRow(m.status, `<span style="color:#FF5500;">${(us ? STEP_NAMES_US : STEP_NAMES)[lang][status]}</span>`);
 
     let priceHtml = "";
     if (record.price_per_lb !== null && record.price_per_lb !== undefined) {
@@ -244,7 +275,7 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
       title,
       `<p style="margin:0 0 4px;">${fill(m.hello, { first })}</p>
        <p style="margin:0;">${intro}</p>
-       ${progressBar(status, lang)}
+       ${progressBar(status, lang, us)}
        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;">${rows}</table>
        ${priceHtml}
        ${supportHtml}`,

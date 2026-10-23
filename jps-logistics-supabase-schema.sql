@@ -596,3 +596,11 @@ $$;
 revoke all on table public.estimate_requests from anon, authenticated;
 grant execute on function public.client_add_estimate(uuid, jsonb, text, numeric, text) to anon, authenticated;
 grant execute on function public.client_list_estimates(uuid) to anon, authenticated;
+
+
+-- ============================================================
+-- 16. Direction of a parcel: 'HT' = Miami -> Haiti (the default, every parcel so far),
+--     'US' = Haiti -> Miami. The warehouse app writes 'US' for parcels sent from Haiti to Miami
+--     (only after the box "The website knows the Haiti -> Miami direction" is ticked in its Fees & rates page).
+-- ============================================================
+alter table public.shipments add column if not exists direction text not null default 'HT';
