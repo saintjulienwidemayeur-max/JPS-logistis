@@ -109,3 +109,16 @@ sent in that language. Re-deploy `client-auth` and `send-notifications`.
 Deploy the `admin-mail` Edge Function (`admin-mail/index.ts`, Verify JWT OFF like the
 others). It uses the same `BREVO_API_KEY` secret. Only owner/agent staff accounts can
 use it (credentials are checked server-side).
+
+
+## 6. Online payment page (pay.html) and the `pay-proxy` function
+Customers pay a receipt or an invoice on **your site** (`https://jpslogistics.me/pay.html?t=...`, same design), not on the billing app.
+The page only shows the amounts and sends the customer to Stripe's secure page; the billing app talks to Stripe and records the payment.
+
+1. Deploy the Edge Function `pay-proxy` (`pay-proxy/index.ts`, **Verify JWT OFF** like the others).
+2. Secret (Edge Functions > Secrets): `BILLING_URL` = the public address of the billing app, for example `https://jps-billing.onrender.com` (no trailing slash).
+3. In Render, on the **billing app** (and the warehouse app) add `PAY_SITE_URL` = `https://jpslogistics.me`. The links in the e-mails, the WhatsApp messages,
+   the invoice PDF and the customer space then point to this page. Without `PAY_SITE_URL` they point to the billing app's own pay page.
+4. Run section 17 of `jps-logistics-supabase-schema.sql` (receipts and payments in the customer's space).
+5. Stripe's own page (where the card is typed) opens on Stripe's address: put the logo and the colours of the site in Stripe > Settings > Branding.
+   A custom address such as `pay.jpslogistics.me` is a Stripe option (Settings > Custom domains).

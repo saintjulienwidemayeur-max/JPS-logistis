@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D2B80">
+<title>Paiement en ligne | JP's Logistics &amp; More</title>
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy-deep:#0A2166; --navy-mid:#1A3893; --flare:#FF5500; --cyan:#1E88E5; --ink:#1B2540; --soft:#6B7490; --border:#E1E7F2; --bg:#F4F7FF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:linear-gradient(160deg,var(--navy-deep),var(--navy-mid)); padding:14px 16px; }
+  .bar { max-width:520px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .bar img { height:42px; width:auto; background:#fff; border-radius:10px; padding:4px 8px; }
+  .langs { display:flex; gap:6px; }
+  .langs button { border:0; border-radius:999px; padding:6px 12px; font:600 12px Inter,sans-serif; cursor:pointer; background:rgba(255,255,255,.15); color:#fff; }
+  .langs button.on { background:#fff; color:var(--navy-deep); }
+  main { max-width:520px; margin:0 auto; padding:22px 16px 40px; }
+  h1 { font:800 28px/1.1 "Big Shoulders Stencil",Inter,sans-serif; color:var(--navy-deep); letter-spacing:.01em; margin:0 0 4px; }
+  .card { background:#fff; border:1px solid var(--border); border-radius:18px; padding:20px; margin-top:16px; box-shadow:0 6px 24px rgba(13,43,128,.06); }
+  .sub { color:var(--soft); font-size:14px; margin:0; }
+  dl { display:grid; grid-template-columns:1fr auto; gap:8px 16px; margin:16px 0 0; font-size:14.5px; }
+  dd { margin:0; text-align:right; }
+  .big { font-size:24px; font-weight:800; color:var(--navy-deep); }
+  .chip { display:inline-block; padding:3px 11px; border-radius:999px; font-size:12px; font-weight:700; }
+  .unpaid,.partial { background:rgba(255,85,0,.1); color:var(--flare); } .paid { background:rgba(30,136,229,.1); color:var(--cyan); }
+  .pay { display:block; width:100%; margin-top:18px; padding:15px 20px; border:0; border-radius:999px; background:var(--flare); color:#fff; font:700 16px Inter,sans-serif; cursor:pointer; }
+  .pay:disabled { opacity:.6; cursor:wait; }
+  .note { font-size:12.5px; color:var(--soft); margin:10px 0 0; text-align:center; }
+  .msg { border-radius:12px; padding:12px 14px; font-size:14px; font-weight:600; margin-top:16px; }
+  .ok { background:#E8F7EE; color:#166534; } .warn { background:#FFF4E5; color:#92400E; } .err { background:#FDECEC; color:#991B1B; }
+  a { color:var(--navy-mid); } .docs { margin:12px 0 0; font-size:13.5px; display:flex; gap:16px; flex-wrap:wrap; }
+  h2 { font-size:15px; margin:0 0 8px; } ul { list-style:none; padding:0; margin:0; font-size:13.5px; }
+  li { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid var(--border); } li:first-child { border-top:0; }
+  footer { text-align:center; color:var(--soft); font-size:12px; margin-top:26px; }
+</style>
+</head>
+<body>
+<header><div class="bar"><a href="/"><img src="/logo.png" alt="JP's Logistics &amp; More"></a><div class="langs" id="langs"></div></div></header>
+<main>
+  <div id="result"></div>
+  <div id="app"><div class="card"><p class="sub" id="loading">…</p></div></div>
+  <footer>JP's Logistics &amp; More · 8125 NW 67th St, Miami, FL 33166 · +1 (786) 424-8025</footer>
+</main>
+<script>
+(function(){
+  const API = 'https://wzlwnhmboqunflqzvlcb.supabase.co/functions/v1/pay-proxy';
+  const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6bHduaG1ib3F1bmZscXp2bGNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMzc4NDMsImV4cCI6MjEwNTkxMzg0M30.tAffoPTs9CFT0KR_e6_uPPfjLjNM3Re4Kev2rcePIGk';
+  const T = {
+    fr: { title:'Paiement en ligne', invoice:'Facture', receipt:"Reçu d'entrepôt", wrPdf:"Reçu d'entrepôt (PDF)", invPdf:'Facture (PDF)', total:'Total', est:'Total estimé', paid:'Payé', bal:'Solde à payer', status:'Statut', unpaid:'À payer', partial:'Partiellement payée', paidS:'Payée', pay:'Payer {x} en ligne', secure:'Paiement sécurisé par Stripe : carte bancaire, Apple Pay, Google Pay, Link et autres moyens selon votre pays.', paidFull:'Facture payée en entier. Merci !', paidFullWr:'Reçu payé en entier. Merci !', estimate:'Montant estimé : le prix final est confirmé sur la facture, après la douane.', payments:'Paiements reçus', rcpt:'Reçu (PDF)', canceled:'Paiement annulé. Vous pouvez réessayer quand vous voulez.', done:'Paiement reçu. Merci !', doneText:'Nous avons bien reçu votre paiement de {x}. Votre reçu vous a été envoyé par e-mail.', pending:'Votre paiement est en cours de traitement. Nous vous écrirons dès qu’il est confirmé.', unknown:'Nous n’avons pas pu confirmer le paiement. Si vous avez été débité, écrivez-nous : nous le retrouverons.', link:'Ce lien n’est pas valide.', off:'Le paiement en ligne n’est pas encore disponible. Utilisez les instructions de paiement de votre facture.', fail:'Impossible d’ouvrir la page de paiement. Réessayez dans un instant.', dl:'Télécharger le reçu (PDF)' },
+    en: { title:'Online payment', invoice:'Invoice', receipt:'Warehouse receipt', wrPdf:'Warehouse receipt (PDF)', invPdf:'Invoice (PDF)', total:'Total', est:'Estimated total', paid:'Paid', bal:'Balance to pay', status:'Status', unpaid:'Unpaid', partial:'Partially paid', paidS:'Paid', pay:'Pay {x} online', secure:'Secure payment by Stripe: bank card, Apple Pay, Google Pay, Link and other methods depending on your country.', paidFull:'Invoice paid in full. Thank you!', paidFullWr:'Receipt paid in full. Thank you!', estimate:'Estimated amount: the final price is confirmed on the invoice, after customs.', payments:'Payments received', rcpt:'Receipt (PDF)', canceled:'Payment cancelled. You can try again whenever you like.', done:'Payment received. Thank you!', doneText:'We received your payment of {x}. Your receipt was e-mailed to you.', pending:'Your payment is being processed. We will write to you as soon as it is confirmed.', unknown:'We could not confirm the payment. If you were charged, write to us and we will find it.', link:'This link is not valid.', off:'Online payment is not available yet. Please use the payment instructions on your invoice.', fail:'The payment page could not be opened. Please try again in a moment.', dl:'Download the receipt (PDF)' },
+    es: { title:'Pago en línea', invoice:'Factura', receipt:'Recibo de almacén', wrPdf:'Recibo de almacén (PDF)', invPdf:'Factura (PDF)', total:'Total', est:'Total estimado', paid:'Pagado', bal:'Saldo a pagar', status:'Estado', unpaid:'Por pagar', partial:'Pagada en parte', paidS:'Pagada', pay:'Pagar {x} en línea', secure:'Pago seguro con Stripe: tarjeta bancaria, Apple Pay, Google Pay, Link y otros métodos según su país.', paidFull:'Factura pagada por completo. ¡Gracias!', paidFullWr:'Recibo pagado por completo. ¡Gracias!', estimate:'Monto estimado: el precio final se confirma en la factura, después de la aduana.', payments:'Pagos recibidos', rcpt:'Recibo (PDF)', canceled:'Pago cancelado. Puede intentarlo de nuevo cuando quiera.', done:'Pago recibido. ¡Gracias!', doneText:'Recibimos su pago de {x}. Su recibo se envió por correo.', pending:'Su pago se está procesando. Le escribiremos en cuanto se confirme.', unknown:'No pudimos confirmar el pago. Si le cobraron, escríbanos y lo encontraremos.', link:'Este enlace no es válido.', off:'El pago en línea aún no está disponible. Use las instrucciones de pago de su factura.', fail:'No se pudo abrir la página de pago. Inténtelo de nuevo en un momento.', dl:'Descargar el recibo (PDF)' },
+  };
+  const q = new URLSearchParams(location.search), token = q.get('t') || '', sid = q.get('session_id') || '';
+  let lang = 'fr', info = null, result = null;
+  try { const s = localStorage.getItem('jps_lang'); if (T[s]) lang = s; else { const n = (navigator.language || 'fr').slice(0, 2); if (T[n]) lang = n; } } catch (e) {}
+  const t = (k) => T[lang][k] || k;
+  const money = (n) => '$' + Number(n || 0).toFixed(2);
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const call = async (action, extra) => {
+    const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', apikey: KEY, authorization: 'Bearer ' + KEY }, body: JSON.stringify(Object.assign({ action, t: token }, extra || {})) });
+    return { status: r.status, data: await r.json().catch(() => ({})) };
+  };
+  const safeUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s"<>]+$/.test(u)) ? u : '';
+  const link = (u, label) => { const a = el('a', null, label); a.href = safeUrl(u) || '#'; a.target = '_blank'; a.rel = 'noopener'; return a; };
+
+  function render() {
+    document.documentElement.lang = lang; document.title = t('title') + " | JP's Logistics & More";
+    const L = $('langs'); L.textContent = '';
+    ['fr', 'en', 'es'].forEach((l) => { const b = el('button', l === lang ? 'on' : '', l.toUpperCase()); b.type = 'button'; b.onclick = () => { lang = l; try { localStorage.setItem('jps_lang', l); } catch (e) {} render(); }; L.appendChild(b); });
+    const R = $('result'); R.textContent = '';
+    if (result) { const m = el('div', 'msg ' + result.cls, result.text); R.appendChild(m); if (result.receipt) { const p = el('p', 'docs'); p.appendChild(link(result.receipt, t('dl'))); R.appendChild(p); } }
+    const A = $('app'); A.textContent = '';
+    if (!info) return;
+    if (info.error) { const c = el('div', 'card'); c.appendChild(el('p', 'msg err', t(info.error === 'link' ? 'link' : 'fail'))); A.appendChild(c); return; }
+    const c = el('div', 'card');
+    c.appendChild(el('h1', null, info.invoice ? t('invoice') + ' ' + info.invoice : t('receipt') + ' ' + info.wr));
+    c.appendChild(el('p', 'sub', info.name + (info.invoice ? ' · ' + t('receipt') + ' ' + info.wr : '')));
+    const d = el('p', 'docs'); if (info.wrPdf) d.appendChild(link(info.wrPdf, t('wrPdf'))); if (info.invoicePdf) d.appendChild(link(info.invoicePdf, t('invPdf'))); if (d.childNodes.length) c.appendChild(d);
+    const dl = el('dl');
+    const row = (k, v, big) => { dl.appendChild(el('dt', null, k)); dl.appendChild(el('dd', big ? 'big' : null, v)); };
+    row(info.invoice ? t('total') : t('est'), money(info.total)); row(t('paid'), money(info.paid)); row(t('bal'), money(info.balance), true);
+    dl.appendChild(el('dt', null, t('status'))); const dd = el('dd'); dd.appendChild(el('span', 'chip ' + info.status, t(info.status === 'paid' ? 'paidS' : info.status))); dl.appendChild(dd);
+    c.appendChild(dl);
+    if (!info.invoice && info.balance > 0.004) c.appendChild(el('p', 'note', t('estimate')));
+    if (info.balance > 0.004) {
+      if (info.canPay) {
+        const b = el('button', 'pay', t('pay').replace('{x}', money(info.balance))); b.type = 'button';
+        b.onclick = async () => { b.disabled = true; try { const r = await call('checkout'); if (r.data.url) { location.href = r.data.url; return; } result = { cls: 'warn', text: t(r.data.error === 'off' ? 'off' : r.data.error === 'paid' ? 'paidFull' : 'fail') }; } catch (e) { result = { cls: 'warn', text: t('fail') }; } render(); };
+        c.appendChild(b); c.appendChild(el('p', 'note', t('secure')));
+      } else c.appendChild(el('p', 'note', t('off')));
+    } else c.appendChild(el('div', 'msg ok', t(info.invoice ? 'paidFull' : 'paidFullWr')));
+    A.appendChild(c);
+    if (info.payments && info.payments.length) {
+      const p = el('div', 'card'); p.appendChild(el('h2', null, t('payments'))); const ul = el('ul');
+      info.payments.forEach((x) => { const li = el('li'); li.appendChild(el('span', null, x.date + ' · ' + x.method)); const r = el('span'); r.appendChild(document.createTextNode(money(x.amount) + ' · ')); r.appendChild(link(x.receipt, t('rcpt'))); li.appendChild(r); ul.appendChild(li); });
+      p.appendChild(ul); A.appendChild(p);
+    }
+  }
+  (async function start() {
+    if (!token) { info = { error: 'link' }; render(); return; }
+    render();
+    if (q.get('canceled')) result = { cls: 'warn', text: t('canceled') };
+    if (sid) {
+      try {
+        const r = await call('confirm', { session_id: sid });
+        if (r.data.ok) result = { cls: 'ok', text: t('doneText').replace('{x}', money(r.data.amount)), receipt: r.data.receipt, head: t('done') };
+        else result = { cls: 'warn', text: t(r.data.pending ? 'pending' : 'unknown') };
+        if (r.data.ok) result.text = t('done') + ' ' + result.text;
+      } catch (e) { result = { cls: 'warn', text: t('unknown') }; }
+      history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(token));
+    }
+    try { const r = await call('info'); info = r.status === 200 ? r.data : { error: r.data.error || 'fail' }; } catch (e) { info = { error: 'fail' }; }
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
