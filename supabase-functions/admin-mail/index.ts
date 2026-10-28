@@ -7,10 +7,10 @@
 // SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 //
 // POST JSON (header "apikey: <publishable key>"):
-//   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments?, cta_label?, cta_url? }
+//   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments?, cta_label?, cta_url?, cta_methods? }
 //        attachments: up to 3 files [{ name, content }], content = the file in base64 (a PDF, at most 3 MB each): used by the warehouse
 //        and billing apps to send the receipt / the invoice as a PDF.
-//   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments?, cta_label?, cta_url? }
+//   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments?, cta_label?, cta_url?, cta_methods? }
 //        to a customer who has no account on the website (the warehouse app sends receipts / invoices to the e-mail it has on file)
 //   { action: "broadcast", staff_email, staff_password, subject, message }
 
@@ -45,10 +45,14 @@ const FOOTNOTE: Record<Lang, string> = {
   es: "Usted recibe este correo porque tiene una cuenta en JP's Logistics &amp; More LLC.",
 };
 
-function layout(title: string, inner: string, cta?: { label: string; url: string }, preheader = "", lang: Lang = "fr"): string {
+// The payment methods shown, very small, inside the "Pay online" button (plain text badges: e-mail apps do not show SVG).
+const METHODS = ["VISA", "Mastercard", "AMEX", "Apple Pay", "Google Pay", "Link"];
+const methodBadges = () => `<span style="display:block;margin-top:8px;line-height:1;font-size:0;">${METHODS.map((m) => `<span style="display:inline-block;background:#ffffff;color:#0D2B80;border-radius:4px;padding:3px 6px;margin:2px 2px 0;font-size:9px;line-height:11px;font-weight:800;font-family:${FONT};">${m}</span>`).join("")}</span>`;
+
+function layout(title: string, inner: string, cta?: { label: string; url: string; methods?: boolean }, preheader = "", lang: Lang = "fr"): string {
   const button = cta
     ? `<tr><td align="center" style="background:#ffffff;padding:6px 28px 30px;">
-         <a href="${cta.url}" style="display:inline-block;background:#FF5500;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:999px;font-family:${FONT};">${cta.label}</a>
+         <a href="${cta.url}" style="display:inline-block;background:#FF5500;color:#ffffff;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:999px;font-family:${FONT};">${cta.label}${cta.methods ? methodBadges() : ""}</a>
        </td></tr>`
     : `<tr><td style="background:#ffffff;height:22px;line-height:22px;font-size:0;">&nbsp;</td></tr>`;
   return `<!doctype html>
@@ -86,20 +90,38 @@ const T = {
 const escapeHtml = (t: string) =>
   t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function buildEmail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, cta?: { label: string; url: string }) {
+// The message as clean paragraphs: a first line that only greets the customer by name is dropped (the design already greets with the full name),
+// blank lines separate paragraphs, **bold** works, "• " lines stay as a list.
+function formatMessage(message: string, name: string): string {
+  const lines = message.replace(/\r/g, "").split("\n");
+  if (name && /^(dear|bonjour|hello|hola|estimad[oa](\/a)?)\b/i.test(lines[0] ?? "") && /,\s*$/.test(lines[0]) && lines[0].toLowerCase().includes(name.toLowerCase())) {
+    lines.shift(); while (lines.length && lines[0].trim() === "") lines.shift();
+  }
+  return lines.join("\n").split(/\n{2,}/).map((b) => `<p style="margin:0 0 14px;">${escapeHtml(b).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p>`).join("");
+}
+
+// The "Pay online" button (with the payment methods, very small, inside it): right under the text, before "other ways to pay".
+const payButton = (cta: { label: string; url: string; methods?: boolean }) =>
+  `<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:6px auto 22px;"><tr><td align="center" style="background:#FF5500;border-radius:18px;">
+     <a href="${escapeHtml(cta.url)}" style="display:block;padding:14px 30px 12px;text-decoration:none;color:#ffffff;font-weight:bold;font-size:16px;text-align:center;font-family:${FONT};">${escapeHtml(cta.label)}${cta.methods ? methodBadges() : ""}</a>
+   </td></tr></table>`;
+
+function buildEmail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, cta?: { label: string; url: string; methods?: boolean }) {
   const lang = asLang(client.lang);
   const tx = T[lang];
-  const first = escapeHtml(String(client.name ?? "").trim());
-  const bodyHtml = escapeHtml(message).replace(/\r?\n/g, "<br>");
+  const first = escapeHtml(String(client.name ?? "").trim()), name = String(client.name ?? "").trim();
+  // The button goes before the "other ways to pay" part when the message has one, else at the end of the message.
+  const cut = cta ? message.search(/\*\*(Autres moyens de paiement|Other ways to pay|Otras formas de pago)\*\*/) : -1;
+  const body = !cta ? formatMessage(message, name) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name) + payButton(cta) + formatMessage(message.slice(cut), "") : formatMessage(message, name) + payButton(cta);
   const html = layout(
     escapeHtml(subject),
     `<p style="margin:0 0 12px;">${tx.hello.replace("{first}", first)}</p>
-     <p style="margin:0;">${bodyHtml}</p>
+     ${body}
      <p style="margin:20px 0 0;color:#6B7490;">${tx.team}</p>
      <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:22px auto 4px;"><tr><td style="background:#25D366;border-radius:999px;">
        <a href="https://wa.me/17864248025" style="display:block;padding:10px 22px 10px 14px;text-decoration:none;color:#ffffff;font-weight:bold;font-size:14px;font-family:${FONT};"><img src="${SITE_URL}/whatsapp.png" width="24" height="24" alt="WhatsApp" style="vertical-align:middle;border:0;margin-right:8px;"><span style="vertical-align:middle;">${tx.support}</span></a>
      </td></tr></table>`,
-    cta ? { label: escapeHtml(cta.label), url: escapeHtml(cta.url) } : undefined,
+    undefined,
     escapeHtml(message).slice(0, 90),
     lang,
   );
@@ -108,11 +130,11 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
 
 type Attachment = { name: string; content: string };
 // An optional button under the message (the "Pay online" button): https only.
-const ctaOf = (body: any): { label: string; url: string } | undefined => {
+const ctaOf = (body: any): { label: string; url: string; methods?: boolean } | undefined => {
   const url = String(body?.cta_url ?? "").trim(), label = String(body?.cta_label ?? "").trim().slice(0, 40);
-  return label && /^https:\/\/[^\s"<>]{4,480}$/.test(url) ? { label, url } : undefined;
+  return label && /^https:\/\/[^\s"<>]{4,480}$/.test(url) ? { label, url, methods: body?.cta_methods === true } : undefined;
 };
-async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = [], cta?: { label: string; url: string }) {
+async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = [], cta?: { label: string; url: string; methods?: boolean }) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": brevoKey, "content-type": "application/json", accept: "application/json" },
