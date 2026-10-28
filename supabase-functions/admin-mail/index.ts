@@ -111,7 +111,8 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
   const tx = T[lang];
   const first = escapeHtml(String(client.name ?? "").trim()), name = String(client.name ?? "").trim();
   // The button goes before the "other ways to pay" part when the message has one, else at the end of the message.
-  const cut = cta ? message.search(/\*\*(Autres moyens de paiement|Other ways to pay|Otras formas de pago)\*\*/) : -1;
+  // (also the older long e-mails: the first line that starts to list how to pay by hand)
+  const cut = cta ? message.search(/\*\*(Autres moyens de paiement|Other ways to pay|Otras formas de pago)\*\*|^(Nous acceptons les espèces|Veuillez vous munir|We accept cash|Please bring cash|Aceptamos efectivo|Por favor, traiga|Pour les virements électroniques|For electronic transfers|Para transferencias electrónicas)/m) : -1;
   const body = !cta ? formatMessage(message, name) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name) + payButton(cta) + formatMessage(message.slice(cut), "") : formatMessage(message, name) + payButton(cta);
   const html = layout(
     escapeHtml(subject),
