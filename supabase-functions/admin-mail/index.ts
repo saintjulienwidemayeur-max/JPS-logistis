@@ -7,7 +7,7 @@
 // SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 //
 // POST JSON (header "apikey: <publishable key>"):
-//   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments? }
+//   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments?, cta_label?, cta_url? }
 //        attachments: up to 3 files [{ name, content }], content = the file in base64 (a PDF, at most 3 MB each): used by the warehouse
 //        and billing apps to send the receipt / the invoice as a PDF.
 //   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments?, cta_label?, cta_url? }
@@ -107,6 +107,11 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
 }
 
 type Attachment = { name: string; content: string };
+// An optional button under the message (the "Pay online" button): https only.
+const ctaOf = (body: any): { label: string; url: string } | undefined => {
+  const url = String(body?.cta_url ?? "").trim(), label = String(body?.cta_label ?? "").trim().slice(0, 40);
+  return label && /^https:\/\/[^\s"<>]{4,480}$/.test(url) ? { label, url } : undefined;
+};
 async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = [], cta?: { label: string; url: string }) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
@@ -164,7 +169,7 @@ Deno.serve(async (req) => {
       const files: Attachment[] = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 3)
         .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
         .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
-      await sendMail(list[0], subject, message, files);
+      await sendMail(list[0], subject, message, files, ctaOf(body));
       return json({ ok: true, sent: 1, total: 1, attached: files.length });
     }
 
@@ -174,10 +179,7 @@ Deno.serve(async (req) => {
       const files: Attachment[] = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 3)
         .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
         .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
-      // An optional button under the message (the "Pay online" button of an invoice): https only.
-      const ctaUrl = String(body.cta_url ?? "").trim(), ctaLabel = String(body.cta_label ?? "").trim().slice(0, 40);
-      const cta = ctaLabel && /^https:\/\/[^\s"<>]{4,480}$/.test(ctaUrl) ? { label: ctaLabel, url: ctaUrl } : undefined;
-      await sendMail({ name: String(body.to_name ?? "").slice(0, 80), email: to, lang: String(body.lang ?? "fr") }, subject, message, files, cta);
+      await sendMail({ name: String(body.to_name ?? "").slice(0, 80), email: to, lang: String(body.lang ?? "fr") }, subject, message, files, ctaOf(body));
       return json({ ok: true, sent: 1, total: 1, attached: files.length });
     }
 
