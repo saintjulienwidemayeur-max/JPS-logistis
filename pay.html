@@ -63,7 +63,7 @@
     es: { loading:'Cargando… (unos segundos)', title:'Pago en línea', invoice:'Factura', receipt:'Recibo de almacén', wrPdf:'Recibo de almacén (PDF)', invPdf:'Factura (PDF)', total:'Total', est:'Total estimado', paid:'Pagado', bal:'Saldo a pagar', status:'Estado', unpaid:'Por pagar', partial:'Pagada en parte', paidS:'Pagada', pay:'Pagar {x} en línea', secure:'Pago seguro con Stripe: tarjeta bancaria, Apple Pay, Google Pay, Link y otros métodos según su país.', paidFull:'Factura pagada por completo. ¡Gracias!', paidFullWr:'Recibo pagado por completo. ¡Gracias!', estimate:'Monto estimado: el precio final se confirma en la factura, después de la aduana.', payments:'Pagos recibidos', rcpt:'Recibo (PDF)', canceled:'Pago cancelado. Puede intentarlo de nuevo cuando quiera.', done:'Pago recibido. ¡Gracias!', doneText:'Recibimos su pago de {x}. Su recibo se envió por correo.', pending:'Su pago se está procesando. Le escribiremos en cuanto se confirme.', unknown:'No pudimos confirmar el pago. Si le cobraron, escríbanos y lo encontraremos.', link:'Este enlace no es válido.', off:'El pago en línea aún no está disponible. Use las instrucciones de pago de su factura.', fail:'No se pudo abrir la página de pago. Inténtelo de nuevo en un momento.', dl:'Descargar el recibo (PDF)' },
   };
   const q = new URLSearchParams(location.search), token = q.get('t') || '', sid = q.get('session_id') || '';
-  let lang = 'fr', info = null, result = null;
+  let lang = 'fr', info = null, result = null, lastCode = '';
   try { const s = localStorage.getItem('jps_lang'); if (T[s]) lang = s; else { const n = (navigator.language || 'fr').slice(0, 2); if (T[n]) lang = n; } } catch (e) {}
   const t = (k) => T[lang][k] || k;
   const money = (n) => '$' + Number(n || 0).toFixed(2);
@@ -71,7 +71,8 @@
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const call = async (action, extra) => {
     const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', apikey: KEY, authorization: 'Bearer ' + KEY }, body: JSON.stringify(Object.assign({ action, t: token }, extra || {})) });
-    return { status: r.status, data: await r.json().catch(() => ({})) };
+    const data = await r.json().catch(() => ({})); lastCode = r.status + (data.error ? ' ' + data.error : (data.message ? ' ' + String(data.message).slice(0, 60) : ''));
+    return { status: r.status, data };
   };
   const safeUrl = (u) => (typeof u === 'string' && /^https:\/\/[^\s"<>]+$/.test(u)) ? u : '';
   const link = (u, label) => { const a = el('a', null, label); a.href = safeUrl(u) || '#'; a.target = '_blank'; a.rel = 'noopener'; return a; };
@@ -92,7 +93,7 @@
     if (result) { const m = el('div', 'msg ' + result.cls, result.text); R.appendChild(m); if (result.receipt) { const p = el('p', 'docs'); p.appendChild(link(result.receipt, t('dl'))); R.appendChild(p); } }
     const A = $('app'); A.textContent = '';
     if (!info) { const c0 = el('div', 'card'); const p0 = el('p', 'sub'); p0.appendChild(el('span', 'spin')); p0.appendChild(document.createTextNode(t('loading'))); c0.appendChild(p0); A.appendChild(c0); return; }
-    if (info.error) { const c = el('div', 'card'); c.appendChild(el('p', 'msg err', t(info.error === 'link' ? 'link' : 'fail'))); A.appendChild(c); return; }
+    if (info.error) { const c = el('div', 'card'); c.appendChild(el('p', 'msg err', t(info.error === 'link' ? 'link' : 'fail'))); if (info.error !== 'link' && lastCode) c.appendChild(el('p', 'note', 'Code : ' + lastCode)); A.appendChild(c); return; }
     const c = el('div', 'card');
     c.appendChild(el('h1', null, info.invoice ? t('invoice') + ' ' + info.invoice : t('receipt') + ' ' + info.wr));
     c.appendChild(el('p', 'sub', info.name + (info.invoice ? ' · ' + t('receipt') + ' ' + info.wr : '')));
@@ -132,7 +133,7 @@
     }
     for (let i = 0; i < 3 && !info; i++) {   // the billing app may be waking up (a few seconds): try again before giving up
       try { const r = await call('info'); if (r.status === 200) info = r.data; else if (r.status === 404 && r.data.error === 'link') info = { error: 'link' }; else if (i === 2) info = { error: 'fail' }; }
-      catch (e) { if (i === 2) info = { error: 'fail' }; }
+      catch (e) { lastCode = 'network ' + String(e && e.message || e).slice(0, 50); if (i === 2) info = { error: 'fail' }; }
       if (!info) await new Promise((res) => setTimeout(res, 4000));
     }
     render();
