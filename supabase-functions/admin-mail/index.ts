@@ -100,6 +100,26 @@ function formatMessage(message: string, name: string): string {
   return lines.join("\n").split(/\n{2,}/).map((b) => `<p style="margin:0 0 14px;">${escapeHtml(b).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p>`).join("");
 }
 
+// "Other ways to pay": small, one row per method with a coloured badge (Zelle, the banks, cash). Text badges: e-mail apps do not show SVG, and no logo file is needed.
+const BADGES: [RegExp, string, string][] = [
+  [/zelle/i, "Zelle", "#6D1ED4"],
+  [/capital\s*banque/i, "Capital Banque", "#0D2B80"],
+  [/bank of america/i, "Bank of America", "#E31837"],
+  [/esp[èe]ces|cash|efectivo|ch[èe]que|check|cheque/i, "Cash / Check", "#6B7490"],
+];
+function formatPayBlock(block: string): string {
+  const lines = block.replace(/\r/g, "").split("\n").filter((l) => l.trim());
+  const title = escapeHtml(lines.shift()!.replace(/\*\*/g, ""));
+  const rows = lines.map((l) => {
+    const text = l.replace(/^•\s*/, "");
+    const hit = BADGES.find(([re]) => re.test(text)) ?? [/./, "", "#6B7490"];
+    const [, label, color] = hit as [RegExp, string, string];
+    const rest = text.replace(/^[^:]+:\s*/, "").replace(/^capital\s*banque\s*·\s*/i, "").replace(/\s*·\s*bank of america(?=\s*·)/i, "");  // the label before the first ":" ("Zelle", "Virement Haïti"...) is the badge's job
+    return `<tr><td valign="top" style="padding:3px 8px 3px 0;white-space:nowrap;"><span style="display:inline-block;background:${color};color:#ffffff;border-radius:4px;padding:2px 7px;font-size:10px;line-height:14px;font-weight:700;font-family:${FONT};">${escapeHtml(label || text.split(":")[0])}</span></td><td valign="top" style="padding:3px 0;font-size:12px;line-height:1.5;color:#4B5675;font-family:${FONT};">${escapeHtml(rest)}</td></tr>`;
+  }).join("");
+  return `<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6B7490;">${title}</p><table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px;">${rows}</table>`;
+}
+
 // The "Pay online" button (with the payment methods, very small, inside it): right under the text, before "other ways to pay".
 const payButton = (cta: { label: string; url: string; methods?: boolean }) =>
   `<table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:6px auto 22px;"><tr><td align="center" style="background:#FF5500;border-radius:18px;">
@@ -113,7 +133,7 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
   // The button goes before the "other ways to pay" part when the message has one, else at the end of the message.
   // (also the older long e-mails: the first line that starts to list how to pay by hand)
   const cut = cta ? message.search(/\*\*(Autres moyens de paiement|Other ways to pay|Otras formas de pago)\*\*|^(Nous acceptons les espèces|Veuillez vous munir|We accept cash|Please bring cash|Aceptamos efectivo|Por favor, traiga|Pour les virements électroniques|For electronic transfers|Para transferencias electrónicas)/m) : -1;
-  const body = !cta ? formatMessage(message, name) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name) + payButton(cta) + formatMessage(message.slice(cut), "") : formatMessage(message, name) + payButton(cta);
+  const body = !cta ? formatMessage(message, name) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name) + payButton(cta) + (/^\*\*/.test(message.slice(cut)) ? formatPayBlock(message.slice(cut)) : formatMessage(message.slice(cut), "")) : formatMessage(message, name) + payButton(cta);
   const html = layout(
     escapeHtml(subject),
     `<p style="margin:0 0 12px;">${tx.hello.replace("{first}", first)}</p>
