@@ -32,7 +32,8 @@
   .pay { display:block; width:100%; margin-top:18px; padding:15px 20px; border:0; border-radius:999px; background:var(--flare); color:#fff; font:700 16px Inter,sans-serif; cursor:pointer; }
   .pay:disabled { opacity:.6; cursor:wait; }
   .pay .lbl { display:block; }
-  .methods { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:5px; margin-top:9px; }
+  .methods { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .methods img { height:14px; width:auto; display:block; }
   .methods span { display:inline-flex; align-items:center; justify-content:center; height:17px; min-width:30px; padding:0 6px; border-radius:4px; background:#fff; font:800 9px/1 Inter,sans-serif; letter-spacing:.01em; white-space:nowrap; }
   .m-visa { color:#1A1F71; font-style:italic; font-size:10px !important; } .m-amex { background:#2E77BC !important; color:#fff; } .m-link { color:#00A86B; } .m-apple { color:#000; } .m-g b:nth-child(1){color:#4285F4} .m-g b:nth-child(2){color:#EA4335} .m-g { color:#5F6368; }
   .mc { display:inline-block; width:10px; height:10px; border-radius:50%; } .mc1 { background:#EB001B; } .mc2 { background:#F79E1B; margin-left:-4px; opacity:.95; }
@@ -98,9 +99,7 @@
   // The payment methods, very small, inside the pay button.
   function methods() {
     const m = el('span', 'methods');
-    const add = (cls, html) => { const x = el('span', cls); x.innerHTML = html; m.appendChild(x); };
-    add('m-visa', 'VISA'); add('', '<i class="mc mc1"></i><i class="mc mc2"></i>'); add('m-amex', 'AMEX');
-    add('m-apple', '&#63743; Pay'); add('m-g', '<b>G</b><b>&nbsp;Pay</b>'); add('m-link', 'Link');
+    [['visa', 'VISA'], ['mastercard', 'Mastercard'], ['amex', 'AMEX'], ['applepay', 'Apple Pay'], ['googlepay', 'Google Pay'], ['link', 'Link']].forEach(([f, n]) => { const i = document.createElement('img'); i.src = '/mail-icons/' + f + '.png'; i.alt = n; i.height = 14; m.appendChild(i); });
     return m;
   }
   function render() {

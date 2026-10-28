@@ -45,9 +45,9 @@ const FOOTNOTE: Record<Lang, string> = {
   es: "Usted recibe este correo porque tiene una cuenta en JP's Logistics &amp; More LLC.",
 };
 
-// The payment methods shown, very small, inside the "Pay online" button (plain text badges: e-mail apps do not show SVG).
-const METHODS = ["VISA", "Mastercard", "AMEX", "Apple Pay", "Google Pay", "Link"];
-const methodBadges = () => `<span style="display:block;margin-top:8px;line-height:1;font-size:0;">${METHODS.map((m) => `<span style="display:inline-block;background:#ffffff;color:#0D2B80;border-radius:4px;padding:3px 6px;margin:2px 2px 0;font-size:9px;line-height:11px;font-weight:800;font-family:${FONT};">${m}</span>`).join("")}</span>`;
+// The payment methods shown, very small, inside the "Pay online" button: small PNG logos hosted on the site (SITE_URL/mail-icons/*.png); the alt text shows when images are blocked.
+const METHODS: [string, string][] = [["visa", "VISA"], ["mastercard", "Mastercard"], ["amex", "AMEX"], ["applepay", "Apple Pay"], ["googlepay", "Google Pay"], ["link", "Link"]];
+const methodBadges = () => `<span style="display:block;margin-top:9px;line-height:1;font-size:11px;color:#ffffff;">${METHODS.map(([f, n]) => `<img src="${SITE_URL}/mail-icons/${f}.png" height="15" alt="${n}" style="display:inline-block;height:15px;width:auto;margin:2px 3px 0;border:0;vertical-align:middle;">`).join("")}</span>`;
 
 function layout(title: string, inner: string, cta?: { label: string; url: string; methods?: boolean }, preheader = "", lang: Lang = "fr"): string {
   const button = cta
