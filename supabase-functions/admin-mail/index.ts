@@ -46,7 +46,7 @@ const FOOTNOTE: Record<Lang, string> = {
 };
 
 // The payment methods shown, very small, inside the "Pay online" button: small PNG logos hosted on the site (SITE_URL/mail-icons/*.png); the alt text shows when images are blocked.
-const METHODS: [string, string][] = [["visa", "VISA"], ["mastercard", "Mastercard"], ["amex", "AMEX"], ["applepay", "Apple Pay"], ["googlepay", "Google Pay"], ["link", "Link"]];
+const METHODS: [string, string][] = [["visa", "VISA"], ["mastercard", "Mastercard"], ["amex", "AMEX"], ["applepay", "Apple Pay"], ["googlepay", "Google Pay"], ["cashapp", "Cash App"], ["link", "Link"]];
 const methodBadges = () => `<span style="display:block;margin-top:9px;line-height:1;font-size:11px;color:#ffffff;">${METHODS.map(([f, n]) => `<img src="${SITE_URL}/mail-icons/${f}.png" height="15" alt="${n}" style="display:inline-block;height:15px;width:auto;margin:2px 3px 0;border:0;vertical-align:middle;">`).join("")}</span>`;
 
 function layout(title: string, inner: string, cta?: { label: string; url: string; methods?: boolean }, preheader = "", lang: Lang = "fr"): string {
