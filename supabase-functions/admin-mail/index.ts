@@ -89,7 +89,7 @@ const escapeHtml = (t: string) =>
 function buildEmail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, cta?: { label: string; url: string }) {
   const lang = asLang(client.lang);
   const tx = T[lang];
-  const first = escapeHtml(String(client.name ?? "").split(" ")[0]);
+  const first = escapeHtml(String(client.name ?? "").trim());
   const bodyHtml = escapeHtml(message).replace(/\r?\n/g, "<br>");
   const html = layout(
     escapeHtml(subject),

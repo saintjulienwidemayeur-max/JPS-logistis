@@ -240,7 +240,7 @@ async function emailClient(record: any, label: string, isNew: boolean, client: a
     const m = MAIL[lang];
     const status = Math.min(Math.max(Number(record.status) || 0, 0), 3);
     const us = record.direction === "US", copy = (us ? STATUS_COPY_US : STATUS_COPY)[lang][status];
-    const first = String(client.name ?? "").split(" ")[0];
+    const first = String(client.name ?? "").trim();
     const lbs = parseFloat(String(record.weight ?? "").replace(",", ".")) || 0;
     const typeLabel = record.type === "Air" ? m.air : record.type === "Mer" ? m.sea : record.type;
 

@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
           { email, name: profile.name },
           w.subject,
           layout(
-            fill(w.title, { name: String(profile.name).split(" ")[0] }),
+            fill(w.title, { name: String(profile.name).trim() }),
             `<p style="margin:0 0 14px;">${w.p1}</p>
              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F7FF;border-radius:14px;"><tr><td style="padding:16px 18px;">
                <div style="font-size:12px;color:#6B7490;text-transform:uppercase;letter-spacing:1px;">${w.box}</div>
