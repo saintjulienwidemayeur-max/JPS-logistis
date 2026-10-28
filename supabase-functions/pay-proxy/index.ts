@@ -29,6 +29,8 @@ Deno.serve(async (req) => {
   try {
     const r = await fetch(`${BILLING}/api/pay/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, ...(sid && { session_id: sid }) }), signal: AbortSignal.timeout(55000) });
     const text = await r.text();
+    // The billing app answers JSON; anything else (a login page, an error page: wrong BILLING_URL, app not redeployed) is reported as "upstream".
+    try { JSON.parse(text); } catch (_e) { return json({ error: "upstream", message: `billing answered ${r.status} (not JSON): check BILLING_URL and redeploy the billing app` }, 502); }
     return new Response(text, { status: r.status, headers: { ...cors, "Content-Type": "application/json" } });
   } catch (_e) { return json({ error: "unreachable" }, 502); }
 });
