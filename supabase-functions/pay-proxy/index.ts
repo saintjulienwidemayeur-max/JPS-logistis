@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   const action = String(b?.action ?? ""), t = String(b?.t ?? ""), sid = String(b?.session_id ?? "");
   if (!["info", "checkout", "confirm"].includes(action) || !/^[A-Za-z0-9_.%-]{10,200}$/.test(t) || (sid && !/^cs_[A-Za-z0-9_]+$/.test(sid))) return json({ error: "bad" }, 400);
   try {
-    const r = await fetch(`${BILLING}/api/pay/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, ...(sid && { session_id: sid }) }), signal: AbortSignal.timeout(25000) });
+    const r = await fetch(`${BILLING}/api/pay/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, ...(sid && { session_id: sid }) }), signal: AbortSignal.timeout(55000) });
     const text = await r.text();
     return new Response(text, { status: r.status, headers: { ...cors, "Content-Type": "application/json" } });
   } catch (_e) { return json({ error: "unreachable" }, 502); }
