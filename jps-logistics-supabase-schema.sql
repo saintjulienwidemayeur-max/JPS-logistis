@@ -604,3 +604,57 @@ grant execute on function public.client_list_estimates(uuid) to anon, authentica
 --     (only after the box "The website knows the Haiti -> Miami direction" is ticked in its Fees & rates page).
 -- ============================================================
 alter table public.shipments add column if not exists direction text not null default 'HT';
+
+
+-- ============================================================
+-- 17. Invoices and payments in the customer's space (online payment).
+--     The billing app writes these two tables with the service_role key every time an invoice or a payment changes.
+--     The customer only reads them through the two functions below (same trust model as pre-alerts: the client id is the key).
+--     "pay_url" opens the secure payment page (Stripe); "receipt_url" opens the PDF receipt of one payment.
+-- ============================================================
+create table if not exists public.client_invoices (
+  id           uuid primary key default gen_random_uuid(),
+  client_id    uuid not null references public.clients(id) on delete cascade,
+  invoice_no   text not null unique,
+  receipt_code text,
+  issued       text,
+  total        numeric(12,2) not null default 0,
+  paid         numeric(12,2) not null default 0,
+  balance      numeric(12,2) not null default 0,
+  status       text not null default 'unpaid' check (status in ('unpaid','partial','paid')),
+  pay_url      text,
+  updated_at   timestamptz not null default now()
+);
+create index if not exists client_invoices_client on public.client_invoices (client_id, updated_at desc);
+create table if not exists public.client_payments (
+  id          uuid primary key default gen_random_uuid(),
+  client_id   uuid not null references public.clients(id) on delete cascade,
+  invoice_no  text not null,
+  paid_on     text,
+  amount      numeric(12,2) not null,
+  method      text,
+  reference   text,
+  receipt_url text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists client_payments_client on public.client_payments (client_id, created_at desc);
+alter table public.client_invoices enable row level security;
+alter table public.client_payments enable row level security;
+-- No policies on purpose: only the functions below and the service_role can touch these tables.
+
+create or replace function public.client_list_invoices(p_client_id uuid)
+returns table(invoice_no text, receipt_code text, issued text, total numeric, paid numeric, balance numeric, status text, pay_url text)
+language sql security definer set search_path = public as $$
+  select i.invoice_no, i.receipt_code, i.issued, i.total, i.paid, i.balance, i.status, i.pay_url
+  from public.client_invoices i where i.client_id = p_client_id order by i.updated_at desc limit 100;
+$$;
+create or replace function public.client_list_payments(p_client_id uuid)
+returns table(invoice_no text, paid_on text, amount numeric, method text, reference text, receipt_url text)
+language sql security definer set search_path = public as $$
+  select p.invoice_no, p.paid_on, p.amount, p.method, p.reference, p.receipt_url
+  from public.client_payments p where p.client_id = p_client_id order by p.created_at desc, p.paid_on desc limit 200;
+$$;
+revoke all on table public.client_invoices from anon, authenticated;
+revoke all on table public.client_payments from anon, authenticated;
+grant execute on function public.client_list_invoices(uuid) to anon, authenticated;
+grant execute on function public.client_list_payments(uuid) to anon, authenticated;

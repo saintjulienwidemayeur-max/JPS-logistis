@@ -10,7 +10,7 @@
 //   { action: "send",      staff_email, staff_password, client_id, subject, message, attachments? }
 //        attachments: up to 3 files [{ name, content }], content = the file in base64 (a PDF, at most 3 MB each): used by the warehouse
 //        and billing apps to send the receipt / the invoice as a PDF.
-//   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments? }
+//   { action: "send_to",   staff_email, staff_password, to_email, to_name?, lang?, subject, message, attachments?, cta_label?, cta_url? }
 //        to a customer who has no account on the website (the warehouse app sends receipts / invoices to the e-mail it has on file)
 //   { action: "broadcast", staff_email, staff_password, subject, message }
 
@@ -86,7 +86,7 @@ const T = {
 const escapeHtml = (t: string) =>
   t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function buildEmail(client: { name?: string; email: string; lang?: string }, subject: string, message: string) {
+function buildEmail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, cta?: { label: string; url: string }) {
   const lang = asLang(client.lang);
   const tx = T[lang];
   const first = escapeHtml(String(client.name ?? "").split(" ")[0]);
@@ -99,7 +99,7 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
      <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:22px auto 4px;"><tr><td style="background:#25D366;border-radius:999px;">
        <a href="https://wa.me/17864248025" style="display:block;padding:10px 22px 10px 14px;text-decoration:none;color:#ffffff;font-weight:bold;font-size:14px;font-family:${FONT};"><img src="${SITE_URL}/whatsapp.png" width="24" height="24" alt="WhatsApp" style="vertical-align:middle;border:0;margin-right:8px;"><span style="vertical-align:middle;">${tx.support}</span></a>
      </td></tr></table>`,
-    undefined,
+    cta ? { label: escapeHtml(cta.label), url: escapeHtml(cta.url) } : undefined,
     escapeHtml(message).slice(0, 90),
     lang,
   );
@@ -107,7 +107,7 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
 }
 
 type Attachment = { name: string; content: string };
-async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = []) {
+async function sendMail(client: { name?: string; email: string; lang?: string }, subject: string, message: string, attachments: Attachment[] = [], cta?: { label: string; url: string }) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": brevoKey, "content-type": "application/json", accept: "application/json" },
@@ -116,7 +116,7 @@ async function sendMail(client: { name?: string; email: string; lang?: string },
       replyTo: { email: SENDER.email, name: SENDER.name },
       to: [{ email: client.email, name: client.name }],
       subject,
-      htmlContent: buildEmail(client, subject, message),
+      htmlContent: buildEmail(client, subject, message, cta),
       ...(attachments.length ? { attachment: attachments } : {}),
     }),
   });
@@ -174,7 +174,10 @@ Deno.serve(async (req) => {
       const files: Attachment[] = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 3)
         .map((a: any) => ({ name: String(a?.name ?? "").replace(/[^\w.\- ]+/g, "_").slice(0, 80), content: String(a?.content ?? "") }))
         .filter((a: Attachment) => a.name && a.content && a.content.length <= 4_200_000 && /^[A-Za-z0-9+/=\s]+$/.test(a.content));
-      await sendMail({ name: String(body.to_name ?? "").slice(0, 80), email: to, lang: String(body.lang ?? "fr") }, subject, message, files);
+      // An optional button under the message (the "Pay online" button of an invoice): https only.
+      const ctaUrl = String(body.cta_url ?? "").trim(), ctaLabel = String(body.cta_label ?? "").trim().slice(0, 40);
+      const cta = ctaLabel && /^https:\/\/[^\s"<>]{4,480}$/.test(ctaUrl) ? { label: ctaLabel, url: ctaUrl } : undefined;
+      await sendMail({ name: String(body.to_name ?? "").slice(0, 80), email: to, lang: String(body.lang ?? "fr") }, subject, message, files, cta);
       return json({ ok: true, sent: 1, total: 1, attached: files.length });
     }
 
