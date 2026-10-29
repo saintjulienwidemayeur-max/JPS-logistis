@@ -672,3 +672,35 @@ revoke all on table public.client_receipts from anon, authenticated;
 revoke all on table public.client_payments from anon, authenticated;
 grant execute on function public.client_list_receipts(uuid) to anon, authenticated;
 grant execute on function public.client_list_payments(uuid) to anon, authenticated;
+
+
+-- ============================================================
+-- 18. The customer edits their own profile (name, e-mail, phone, address, city, country) in their space.
+--     The current password is required only when the e-mail changes (it is the sign-in name). The e-mail and the phone must stay unique.
+-- ============================================================
+create or replace function public.client_update_profile(
+  p_client_id uuid, p_password text, p_name text, p_email text, p_phone text, p_address text, p_city text, p_country text
+) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  v_old public.clients%rowtype;
+  v_email text := lower(btrim(coalesce(p_email, '')));
+  v_phone text := regexp_replace(coalesce(p_phone, ''), '\D', '', 'g');
+begin
+  select * into v_old from public.clients where id = p_client_id;
+  if not found then raise exception 'NOT_AUTHORIZED'; end if;
+  if length(btrim(coalesce(p_name, ''))) < 2 or length(btrim(p_name)) > 80 then raise exception 'BAD_NAME'; end if;
+  if v_email !~ '^[^\s@]+@[^\s@]+\.[^\s@]+$' or length(v_email) > 120 then raise exception 'BAD_EMAIL'; end if;
+  if v_email <> lower(v_old.email) then
+    if not exists (select 1 from public.client_auth a where a.client_id = p_client_id and a.password_hash = public.jps_hash(coalesce(p_password, ''))) then raise exception 'WRONG_PASSWORD'; end if;
+    if exists (select 1 from public.clients c where lower(c.email) = v_email and c.id <> p_client_id) then raise exception 'EMAIL_TAKEN'; end if;
+  end if;
+  if length(v_phone) > 0 and exists (select 1 from public.clients c where c.id <> p_client_id and regexp_replace(coalesce(c.phone, ''), '\D', '', 'g') = v_phone) then raise exception 'PHONE_TAKEN'; end if;
+  update public.clients set
+    name = btrim(p_name), email = v_email, phone = nullif(btrim(coalesce(p_phone, '')), ''),
+    address = nullif(left(btrim(coalesce(p_address, '')), 160), ''), city = nullif(left(btrim(coalesce(p_city, '')), 80), ''), country = nullif(left(btrim(coalesce(p_country, '')), 40), '')
+  where id = p_client_id;
+end;
+$$;
+revoke all on function public.client_update_profile(uuid, text, text, text, text, text, text, text) from public;
+grant execute on function public.client_update_profile(uuid, text, text, text, text, text, text, text) to anon, authenticated;
