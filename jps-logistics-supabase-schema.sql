@@ -704,3 +704,11 @@ end;
 $$;
 revoke all on function public.client_update_profile(uuid, text, text, text, text, text, text, text) from public;
 grant execute on function public.client_update_profile(uuid, text, text, text, text, text, text, text) to anon, authenticated;
+
+
+-- ============================================================
+-- 19. One message per delivery. When the warehouse app saves a delivery ("Finish and save" on Received items) it adds each parcel to the customer's tracking page
+--     with quiet = true: the website sends no push / e-mail per parcel (send-notifications skips a new quiet row), and the warehouse app sends ONE e-mail
+--     with all the tracking numbers. Run this, then re-deploy send-notifications.
+-- ============================================================
+alter table public.shipments add column if not exists quiet boolean not null default false;

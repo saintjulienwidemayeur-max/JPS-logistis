@@ -92,9 +92,12 @@ const escapeHtml = (t: string) =>
 
 // The message as clean paragraphs: a first line that only greets the customer by name is dropped (the design already greets with the full name),
 // blank lines separate paragraphs, **bold** works, "• " lines stay as a list.
-function formatMessage(message: string, name: string): string {
+// A message that begins with its own greeting to the customer by full name ("Cher(ère) Valérie Youance Desinor,") keeps it, and the design adds no second greeting.
+const SALUTATION = /^(dear|cher|ch[èe]re|bonjour|hello|hola|estimad[oa](\/a)?)\b/i;
+const ownGreeting = (message: string, name: string) => { const l = message.replace(/\r/g, "").split("\n")[0] ?? ""; return !!name && SALUTATION.test(l) && /,\s*$/.test(l) && l.toLowerCase().includes(name.toLowerCase()); };
+function formatMessage(message: string, name: string, keepGreeting = false): string {
   const lines = message.replace(/\r/g, "").split("\n");
-  if (name && /^(dear|bonjour|hello|hola|estimad[oa](\/a)?)\b/i.test(lines[0] ?? "") && /,\s*$/.test(lines[0]) && lines[0].toLowerCase().includes(name.toLowerCase())) {
+  if (!keepGreeting && name && /^(dear|bonjour|hello|hola|estimad[oa](\/a)?)\b/i.test(lines[0] ?? "") && /,\s*$/.test(lines[0]) && lines[0].toLowerCase().includes(name.toLowerCase())) {
     lines.shift(); while (lines.length && lines[0].trim() === "") lines.shift();
   }
   return lines.join("\n").split(/\n{2,}/).map((b) => `<p style="margin:0 0 14px;">${escapeHtml(b).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p>`).join("");
@@ -133,10 +136,11 @@ function buildEmail(client: { name?: string; email: string; lang?: string }, sub
   // The button goes before the "other ways to pay" part when the message has one, else at the end of the message.
   // (also the older long e-mails: the first line that starts to list how to pay by hand)
   const cut = cta ? message.search(/\*\*(Autres moyens de paiement|Other ways to pay|Otras formas de pago)\*\*|^(Nous acceptons les espèces|Veuillez vous munir|We accept cash|Please bring cash|Aceptamos efectivo|Por favor, traiga|Pour les virements électroniques|For electronic transfers|Para transferencias electrónicas)/m) : -1;
-  const body = !cta ? formatMessage(message, name) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name) + payButton(cta) + (/^\*\*/.test(message.slice(cut)) ? formatPayBlock(message.slice(cut)) : formatMessage(message.slice(cut), "")) : formatMessage(message, name) + payButton(cta);
+  const own = ownGreeting(message, name);
+  const body = !cta ? formatMessage(message, name, own) : cut > 0 ? formatMessage(message.slice(0, cut).trimEnd(), name, own) + payButton(cta) + (/^\*\*/.test(message.slice(cut)) ? formatPayBlock(message.slice(cut)) : formatMessage(message.slice(cut), "")) : formatMessage(message, name, own) + payButton(cta);
   const html = layout(
     escapeHtml(subject),
-    `<p style="margin:0 0 12px;">${tx.hello.replace("{first}", first)}</p>
+    `${own ? "" : `<p style="margin:0 0 12px;">${tx.hello.replace("{first}", first)}</p>`}
      ${body}
      <p style="margin:20px 0 0;color:#6B7490;">${tx.team}</p>
      <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:22px auto 4px;"><tr><td style="background:#25D366;border-radius:999px;">
