@@ -69,6 +69,10 @@ Deno.serve(async (req) => {
     if (old && old.status === record.status) {
       return new Response(JSON.stringify({ skipped: "status unchanged" }), { status: 200 });
     }
+    // A parcel added by the warehouse app as part of a delivery ("Finish and save"): the warehouse app sends ONE e-mail for all the parcels, so no message per parcel here.
+    if (!old && record.quiet === true) {
+      return new Response(JSON.stringify({ skipped: "quiet (one message for the whole delivery)" }), { status: 200 });
+    }
 
     const client = await getClient(supabase, record.client_id);
     const lang = asLang(client?.lang);
